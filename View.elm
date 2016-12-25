@@ -26,17 +26,18 @@ view_module : Module -> Html Msg
 view_module bindings = span []  (bindings |> map view_binding)
 
 view_binding : Binding -> Html Msg
-view_binding (name, mtyp, exp) = span [ class "binding" ] <|
-  let type_annotation = case mtyp of
-    Just typ -> div [ class "binding_typ"]
+view_binding (name, mtyp, exp) = span [ class "binding" ] <| case mtyp of
+  Just typ ->
+    [ div [ class "binding_typ"]
       [ span [ class "name" ] [ text name ]
       , keyword ":"
-      , view_typ typ ]
-    Nothing -> text ""
-  in  [ type_annotation
-      , span [] --[ span [ class "name" ] [ text name ]
-                [ keyword "="
-                , view_exp exp ] ]
+      , view_typ typ
+      , keyword "=" ]
+    , view_exp exp ]
+  Nothing ->
+    [ span [ class "name" ] [ text name ]
+    , keyword "="
+    , view_exp exp ]
 
 view_typ : Typ -> Html Msg
 view_typ typ = case typ of
@@ -131,6 +132,10 @@ css model = """
 span {
   display: inline-block;
   padding: 1px;
+}
+
+.exp.var {
+  color: black;
 }
 
 .exp.apply, .exp.if, .exp.apply.op, .exp.lam, .binding, .typ.apply, .typ.arrow {

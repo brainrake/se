@@ -8453,7 +8453,7 @@ var _user$project$Model$Nop = {ctor: 'Nop'};
 var _user$project$View$css = function (model) {
 	return A2(
 		_elm_lang$core$Basics_ops['++'],
-		'\n* {\n  font-family: sans;\n}\n\n.code {\n  #width: 600px;\n}\n\nspan {\n  display: inline-block;\n  padding: 1px;\n}\n\n.exp.apply, .exp.if, .exp.apply.op, .exp.lam, .binding, .typ.apply, .typ.arrow {\n  color: black;\n  border-width : 0;\n',
+		'\n* {\n  font-family: sans;\n}\n\n.code {\n  #width: 600px;\n}\n\nspan {\n  display: inline-block;\n  padding: 1px;\n}\n\n.exp.var {\n  color: black;\n}\n\n.exp.apply, .exp.if, .exp.apply.op, .exp.lam, .binding, .typ.apply, .typ.arrow {\n  color: black;\n  border-width : 0;\n',
 		A2(
 			_elm_lang$core$Basics_ops['++'],
 			model.show_borders ? '\n  border: 1px solid grey;\n  padding: 2px;\n  margin: 2px;\n  border-radius: 4px;\n' : '',
@@ -8668,6 +8668,8 @@ var _user$project$View$view_typ = function (typ) {
 };
 var _user$project$View$view_binding = function (_p5) {
 	var _p6 = _p5;
+	var _p9 = _p6._0;
+	var _p8 = _p6._2;
 	return A2(
 		_elm_lang$html$Html$span,
 		{
@@ -8676,10 +8678,11 @@ var _user$project$View$view_binding = function (_p5) {
 			_1: {ctor: '[]'}
 		},
 		function () {
-			var type_annotation = function () {
-				var _p7 = _p6._1;
-				if (_p7.ctor === 'Just') {
-					return A2(
+			var _p7 = _p6._1;
+			if (_p7.ctor === 'Just') {
+				return {
+					ctor: '::',
+					_0: A2(
 						_elm_lang$html$Html$div,
 						{
 							ctor: '::',
@@ -8697,7 +8700,7 @@ var _user$project$View$view_binding = function (_p5) {
 								},
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text(_p6._0),
+									_0: _elm_lang$html$Html$text(_p9),
 									_1: {ctor: '[]'}
 								}),
 							_1: {
@@ -8706,39 +8709,51 @@ var _user$project$View$view_binding = function (_p5) {
 								_1: {
 									ctor: '::',
 									_0: _user$project$View$view_typ(_p7._0),
-									_1: {ctor: '[]'}
+									_1: {
+										ctor: '::',
+										_0: _user$project$View$keyword('='),
+										_1: {ctor: '[]'}
+									}
 								}
 							}
-						});
-				} else {
-					return _elm_lang$html$Html$text('');
-				}
-			}();
-			return {
-				ctor: '::',
-				_0: type_annotation,
-				_1: {
+						}),
+					_1: {
+						ctor: '::',
+						_0: _user$project$View$view_exp(_p8),
+						_1: {ctor: '[]'}
+					}
+				};
+			} else {
+				return {
 					ctor: '::',
 					_0: A2(
 						_elm_lang$html$Html$span,
-						{ctor: '[]'},
 						{
 							ctor: '::',
-							_0: _user$project$View$keyword('='),
-							_1: {
-								ctor: '::',
-								_0: _user$project$View$view_exp(_p6._2),
-								_1: {ctor: '[]'}
-							}
+							_0: _elm_lang$html$Html_Attributes$class('name'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(_p9),
+							_1: {ctor: '[]'}
 						}),
-					_1: {ctor: '[]'}
-				}
-			};
+					_1: {
+						ctor: '::',
+						_0: _user$project$View$keyword('='),
+						_1: {
+							ctor: '::',
+							_0: _user$project$View$view_exp(_p8),
+							_1: {ctor: '[]'}
+						}
+					}
+				};
+			}
 		}());
 };
 var _user$project$View$view_exp = function (exp) {
-	var _p8 = exp;
-	switch (_p8.ctor) {
+	var _p10 = exp;
+	switch (_p10.ctor) {
 		case 'Let':
 			return A2(
 				_elm_lang$html$Html$span,
@@ -8755,13 +8770,13 @@ var _user$project$View$view_exp = function (exp) {
 						_0: A2(
 							_elm_lang$html$Html$span,
 							{ctor: '[]'},
-							A2(_elm_lang$core$List$map, _user$project$View$view_binding, _p8._0)),
+							A2(_elm_lang$core$List$map, _user$project$View$view_binding, _p10._0)),
 						_1: {
 							ctor: '::',
 							_0: _user$project$View$keyword('in'),
 							_1: {
 								ctor: '::',
-								_0: _user$project$View$view_exp(_p8._1),
+								_0: _user$project$View$view_exp(_p10._1),
 								_1: {ctor: '[]'}
 							}
 						}
@@ -8789,7 +8804,7 @@ var _user$project$View$view_exp = function (exp) {
 							},
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text(_p8._0),
+								_0: _elm_lang$html$Html$text(_p10._0),
 								_1: {ctor: '[]'}
 							}),
 						_1: {
@@ -8808,15 +8823,15 @@ var _user$project$View$view_exp = function (exp) {
 								}),
 							_1: {
 								ctor: '::',
-								_0: _user$project$View$view_exp(_p8._1),
+								_0: _user$project$View$view_exp(_p10._1),
 								_1: {ctor: '[]'}
 							}
 						}
 					}
 				});
 		case 'Apply':
-			var _p13 = _p8._1;
-			var _p12 = _p8._0;
+			var _p15 = _p10._1;
+			var _p14 = _p10._0;
 			var view_apply = A2(
 				_elm_lang$html$Html$span,
 				{
@@ -8840,13 +8855,13 @@ var _user$project$View$view_exp = function (exp) {
 						}),
 					_1: {
 						ctor: '::',
-						_0: _user$project$View$view_exp(_p12),
+						_0: _user$project$View$view_exp(_p14),
 						_1: {
 							ctor: '::',
 							_0: _user$project$View$keyword(' '),
 							_1: {
 								ctor: '::',
-								_0: _user$project$View$view_exp(_p13),
+								_0: _user$project$View$view_exp(_p15),
 								_1: {
 									ctor: '::',
 									_0: A2(
@@ -8867,20 +8882,20 @@ var _user$project$View$view_exp = function (exp) {
 						}
 					}
 				});
-			var _p9 = _p12;
-			if (((_p9.ctor === 'Apply') && (_p9._0.ctor === 'Var')) && (_p9._0._0.ctor === '_Tuple2')) {
-				var _p11 = _p9._0._0._1;
+			var _p11 = _p14;
+			if (((_p11.ctor === 'Apply') && (_p11._0.ctor === 'Var')) && (_p11._0._0.ctor === '_Tuple2')) {
+				var _p13 = _p11._0._0._1;
 				return A2(
 					_elm_community$maybe_extra$Maybe_Extra_ops['?'],
 					A2(
 						_elm_lang$core$Maybe$map,
-						function (_p10) {
+						function (_p12) {
 							return function (c) {
 								return _elm_lang$core$Char$isUpper(c) || _elm_lang$core$Char$isLower(c);
 							}(
-								_elm_lang$core$Tuple$first(_p10));
+								_elm_lang$core$Tuple$first(_p12));
 						},
-						_elm_lang$core$String$uncons(_p11)),
+						_elm_lang$core$String$uncons(_p13)),
 					true) ? view_apply : A2(
 					_elm_lang$html$Html$span,
 					{
@@ -8904,7 +8919,7 @@ var _user$project$View$view_exp = function (exp) {
 							}),
 						_1: {
 							ctor: '::',
-							_0: _user$project$View$view_exp(_p9._1),
+							_0: _user$project$View$view_exp(_p11._1),
 							_1: {
 								ctor: '::',
 								_0: _elm_lang$html$Html$text(' '),
@@ -8912,13 +8927,13 @@ var _user$project$View$view_exp = function (exp) {
 									ctor: '::',
 									_0: _user$project$View$view_exp(
 										_user$project$Lang$Var(
-											{ctor: '_Tuple2', _0: _p9._0._0._0, _1: _p11})),
+											{ctor: '_Tuple2', _0: _p11._0._0._0, _1: _p13})),
 									_1: {
 										ctor: '::',
 										_0: _elm_lang$html$Html$text(' '),
 										_1: {
 											ctor: '::',
-											_0: _user$project$View$view_exp(_p13),
+											_0: _user$project$View$view_exp(_p15),
 											_1: {
 												ctor: '::',
 												_0: A2(
@@ -8954,7 +8969,7 @@ var _user$project$View$view_exp = function (exp) {
 				},
 				{
 					ctor: '::',
-					_0: _user$project$View$view_qname(_p8._0),
+					_0: _user$project$View$view_qname(_p10._0),
 					_1: {ctor: '[]'}
 				});
 		case 'If':
@@ -8970,19 +8985,19 @@ var _user$project$View$view_exp = function (exp) {
 					_0: _user$project$View$keyword('if'),
 					_1: {
 						ctor: '::',
-						_0: _user$project$View$view_exp(_p8._0),
+						_0: _user$project$View$view_exp(_p10._0),
 						_1: {
 							ctor: '::',
 							_0: _user$project$View$keyword('then'),
 							_1: {
 								ctor: '::',
-								_0: _user$project$View$view_exp(_p8._1),
+								_0: _user$project$View$view_exp(_p10._1),
 								_1: {
 									ctor: '::',
 									_0: _user$project$View$keyword('else'),
 									_1: {
 										ctor: '::',
-										_0: _user$project$View$view_exp(_p8._2),
+										_0: _user$project$View$view_exp(_p10._2),
 										_1: {ctor: '[]'}
 									}
 								}
@@ -9000,26 +9015,26 @@ var _user$project$View$view_exp = function (exp) {
 				},
 				A2(
 					_elm_lang$core$List$map,
-					function (_p14) {
-						var _p15 = _p14;
+					function (_p16) {
+						var _p17 = _p16;
 						return A2(
 							_elm_lang$html$Html$span,
 							{ctor: '[]'},
 							{
 								ctor: '::',
-								_0: _user$project$View$view_pattern(_p15._0),
+								_0: _user$project$View$view_pattern(_p17._0),
 								_1: {
 									ctor: '::',
 									_0: _elm_lang$html$Html$text(' => '),
 									_1: {
 										ctor: '::',
-										_0: _user$project$View$view_exp(_p15._1),
+										_0: _user$project$View$view_exp(_p17._1),
 										_1: {ctor: '[]'}
 									}
 								}
 							});
 					},
-					_p8._0));
+					_p10._0));
 		default:
 			return A2(
 				_elm_lang$html$Html$span,
@@ -9030,7 +9045,7 @@ var _user$project$View$view_exp = function (exp) {
 				},
 				{
 					ctor: '::',
-					_0: _user$project$View$view_literal(_p8._0),
+					_0: _user$project$View$view_literal(_p10._0),
 					_1: {ctor: '[]'}
 				});
 	}
