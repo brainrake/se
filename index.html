@@ -8406,6 +8406,9 @@ var _user$project$Lang$TVar = function (a) {
 var _user$project$Lang$TName = function (a) {
 	return {ctor: 'TName', _0: a};
 };
+var _user$project$Lang$Dict = function (a) {
+	return {ctor: 'Dict', _0: a};
+};
 var _user$project$Lang$Case = function (a) {
 	return {ctor: 'Case', _0: a};
 };
@@ -9035,7 +9038,7 @@ var _user$project$View$view_exp = function (exp) {
 							});
 					},
 					_p10._0));
-		default:
+		case 'Lit':
 			return A2(
 				_elm_lang$html$Html$span,
 				{
@@ -9048,6 +9051,8 @@ var _user$project$View$view_exp = function (exp) {
 					_0: _user$project$View$view_literal(_p10._0),
 					_1: {ctor: '[]'}
 				});
+		default:
+			return _elm_lang$html$Html$text('dict');
 	}
 };
 var _user$project$View$view_module = function (bindings) {
@@ -9168,13 +9173,427 @@ var _user$project$Main$module_ = {
 				_user$project$Lang$TName(
 					{
 						ctor: '_Tuple2',
-						_0: {ctor: '[]'},
+						_0: {
+							ctor: '::',
+							_0: 'Basics',
+							_1: {ctor: '[]'}
+						},
 						_1: 'Int'
 					}),
 				_user$project$Lang$TName(
 					{
 						ctor: '_Tuple2',
-						_0: {ctor: '[]'},
+						_0: {
+							ctor: '::',
+							_0: 'Basics',
+							_1: {ctor: '[]'}
+						},
+						_1: 'String'
+					}))),
+		_2: A2(
+			_user$project$Lang$Lam,
+			'n',
+			A3(
+				_user$project$Lang$If,
+				A2(
+					_user$project$Lang$Apply,
+					A2(
+						_user$project$Lang$Apply,
+						_user$project$Lang$Var(
+							{
+								ctor: '_Tuple2',
+								_0: {
+									ctor: '::',
+									_0: 'Basics',
+									_1: {ctor: '[]'}
+								},
+								_1: '&&'
+							}),
+						A2(
+							_user$project$Lang$Apply,
+							A2(
+								_user$project$Lang$Apply,
+								_user$project$Lang$Var(
+									{
+										ctor: '_Tuple2',
+										_0: {
+											ctor: '::',
+											_0: 'Basics',
+											_1: {ctor: '[]'}
+										},
+										_1: '=='
+									}),
+								A2(
+									_user$project$Lang$Apply,
+									A2(
+										_user$project$Lang$Apply,
+										_user$project$Lang$Var(
+											{
+												ctor: '_Tuple2',
+												_0: {
+													ctor: '::',
+													_0: 'Basics',
+													_1: {ctor: '[]'}
+												},
+												_1: '%'
+											}),
+										_user$project$Lang$Var(
+											{
+												ctor: '_Tuple2',
+												_0: {ctor: '[]'},
+												_1: 'n'
+											})),
+									_user$project$Lang$Lit(
+										_user$project$Lang$Num(3)))),
+							_user$project$Lang$Lit(
+								_user$project$Lang$Num(0)))),
+					A2(
+						_user$project$Lang$Apply,
+						A2(
+							_user$project$Lang$Apply,
+							_user$project$Lang$Var(
+								{
+									ctor: '_Tuple2',
+									_0: {
+										ctor: '::',
+										_0: 'Basics',
+										_1: {ctor: '[]'}
+									},
+									_1: '=='
+								}),
+							A2(
+								_user$project$Lang$Apply,
+								A2(
+									_user$project$Lang$Apply,
+									_user$project$Lang$Var(
+										{
+											ctor: '_Tuple2',
+											_0: {
+												ctor: '::',
+												_0: 'Basics',
+												_1: {ctor: '[]'}
+											},
+											_1: '%'
+										}),
+									_user$project$Lang$Var(
+										{
+											ctor: '_Tuple2',
+											_0: {ctor: '[]'},
+											_1: 'n'
+										})),
+								_user$project$Lang$Lit(
+									_user$project$Lang$Num(5)))),
+						_user$project$Lang$Lit(
+							_user$project$Lang$Num(0)))),
+				_user$project$Lang$Lit(
+					_user$project$Lang$Str('fizzbuzz')),
+				A3(
+					_user$project$Lang$If,
+					A2(
+						_user$project$Lang$Apply,
+						A2(
+							_user$project$Lang$Apply,
+							_user$project$Lang$Var(
+								{
+									ctor: '_Tuple2',
+									_0: {
+										ctor: '::',
+										_0: 'Basics',
+										_1: {ctor: '[]'}
+									},
+									_1: '=='
+								}),
+							A2(
+								_user$project$Lang$Apply,
+								A2(
+									_user$project$Lang$Apply,
+									_user$project$Lang$Var(
+										{
+											ctor: '_Tuple2',
+											_0: {
+												ctor: '::',
+												_0: 'Basics',
+												_1: {ctor: '[]'}
+											},
+											_1: '%'
+										}),
+									_user$project$Lang$Var(
+										{
+											ctor: '_Tuple2',
+											_0: {ctor: '[]'},
+											_1: 'n'
+										})),
+								_user$project$Lang$Lit(
+									_user$project$Lang$Num(3)))),
+						_user$project$Lang$Lit(
+							_user$project$Lang$Num(0))),
+					_user$project$Lang$Lit(
+						_user$project$Lang$Str('fizz')),
+					A3(
+						_user$project$Lang$If,
+						A2(
+							_user$project$Lang$Apply,
+							A2(
+								_user$project$Lang$Apply,
+								_user$project$Lang$Var(
+									{
+										ctor: '_Tuple2',
+										_0: {
+											ctor: '::',
+											_0: 'Basics',
+											_1: {ctor: '[]'}
+										},
+										_1: '=='
+									}),
+								A2(
+									_user$project$Lang$Apply,
+									A2(
+										_user$project$Lang$Apply,
+										_user$project$Lang$Var(
+											{
+												ctor: '_Tuple2',
+												_0: {
+													ctor: '::',
+													_0: 'Basics',
+													_1: {ctor: '[]'}
+												},
+												_1: '%'
+											}),
+										_user$project$Lang$Var(
+											{
+												ctor: '_Tuple2',
+												_0: {ctor: '[]'},
+												_1: 'n'
+											})),
+									_user$project$Lang$Lit(
+										_user$project$Lang$Num(5)))),
+							_user$project$Lang$Lit(
+								_user$project$Lang$Num(0))),
+						_user$project$Lang$Lit(
+							_user$project$Lang$Str('buzz')),
+						A2(
+							_user$project$Lang$Apply,
+							_user$project$Lang$Var(
+								{
+									ctor: '_Tuple2',
+									_0: {
+										ctor: '::',
+										_0: 'Basics',
+										_1: {ctor: '[]'}
+									},
+									_1: 'toString'
+								}),
+							_user$project$Lang$Var(
+								{
+									ctor: '_Tuple2',
+									_0: {ctor: '[]'},
+									_1: 'n'
+								}))))))
+	},
+	_1: {
+		ctor: '::',
+		_0: {
+			ctor: '_Tuple3',
+			_0: 'main',
+			_1: _elm_lang$core$Maybe$Just(
+				A2(
+					_user$project$Lang$TApply,
+					_user$project$Lang$TName(
+						{
+							ctor: '_Tuple2',
+							_0: {
+								ctor: '::',
+								_0: 'Html',
+								_1: {ctor: '[]'}
+							},
+							_1: 'Html'
+						}),
+					_user$project$Lang$TVar('msg'))),
+			_2: A2(
+				_user$project$Lang$Apply,
+				A2(
+					_user$project$Lang$Apply,
+					_user$project$Lang$Var(
+						{
+							ctor: '_Tuple2',
+							_0: {
+								ctor: '::',
+								_0: 'Html',
+								_1: {ctor: '[]'}
+							},
+							_1: 'ul'
+						}),
+					_user$project$Lang$Var(
+						{
+							ctor: '_Tuple2',
+							_0: {
+								ctor: '::',
+								_0: 'List',
+								_1: {ctor: '[]'}
+							},
+							_1: '[]'
+						})),
+				A2(
+					_user$project$Lang$Apply,
+					A2(
+						_user$project$Lang$Apply,
+						_user$project$Lang$Var(
+							{
+								ctor: '_Tuple2',
+								_0: {
+									ctor: '::',
+									_0: 'Basics',
+									_1: {ctor: '[]'}
+								},
+								_1: '|>'
+							}),
+						A2(
+							_user$project$Lang$Apply,
+							A2(
+								_user$project$Lang$Apply,
+								_user$project$Lang$Var(
+									{
+										ctor: '_Tuple2',
+										_0: {
+											ctor: '::',
+											_0: 'List',
+											_1: {ctor: '[]'}
+										},
+										_1: 'range'
+									}),
+								_user$project$Lang$Lit(
+									_user$project$Lang$Num(1))),
+							_user$project$Lang$Lit(
+								_user$project$Lang$Num(100)))),
+					A2(
+						_user$project$Lang$Apply,
+						_user$project$Lang$Var(
+							{
+								ctor: '_Tuple2',
+								_0: {
+									ctor: '::',
+									_0: 'List',
+									_1: {ctor: '[]'}
+								},
+								_1: 'map'
+							}),
+						A2(
+							_user$project$Lang$Lam,
+							'n',
+							A2(
+								_user$project$Lang$Apply,
+								A2(
+									_user$project$Lang$Apply,
+									_user$project$Lang$Var(
+										{
+											ctor: '_Tuple2',
+											_0: {
+												ctor: '::',
+												_0: 'Html',
+												_1: {ctor: '[]'}
+											},
+											_1: 'li'
+										}),
+									_user$project$Lang$Var(
+										{
+											ctor: '_Tuple2',
+											_0: {
+												ctor: '::',
+												_0: 'List',
+												_1: {ctor: '[]'}
+											},
+											_1: '[]'
+										})),
+								A2(
+									_user$project$Lang$Apply,
+									A2(
+										_user$project$Lang$Apply,
+										_user$project$Lang$Var(
+											{
+												ctor: '_Tuple2',
+												_0: {
+													ctor: '::',
+													_0: 'List',
+													_1: {ctor: '[]'}
+												},
+												_1: '::'
+											}),
+										A2(
+											_user$project$Lang$Apply,
+											_user$project$Lang$Var(
+												{
+													ctor: '_Tuple2',
+													_0: {
+														ctor: '::',
+														_0: 'Html',
+														_1: {ctor: '[]'}
+													},
+													_1: 'text'
+												}),
+											A2(
+												_user$project$Lang$Apply,
+												_user$project$Lang$Var(
+													{
+														ctor: '_Tuple2',
+														_0: {
+															ctor: '::',
+															_0: 'Main',
+															_1: {ctor: '[]'}
+														},
+														_1: 'fizzbuzz'
+													}),
+												_user$project$Lang$Var(
+													{
+														ctor: '_Tuple2',
+														_0: {ctor: '[]'},
+														_1: 'n'
+													})))),
+									_user$project$Lang$Var(
+										{
+											ctor: '_Tuple2',
+											_0: {
+												ctor: '::',
+												_0: 'List',
+												_1: {ctor: '[]'}
+											},
+											_1: '[]'
+										})))))))
+		},
+		_1: {ctor: '[]'}
+	}
+};
+var _user$project$Main$main = _elm_lang$html$Html$beginnerProgram(
+	{
+		model: {module_: _user$project$Main$module_, show_borders: true, show_qualifiers: true},
+		view: _user$project$View$view,
+		update: _user$project$Main$update
+	})();
+var _user$project$Main$module__ = {
+	ctor: '::',
+	_0: {
+		ctor: '_Tuple3',
+		_0: 'fizzbuzz',
+		_1: _elm_lang$core$Maybe$Just(
+			A2(
+				_user$project$Lang$TArrow,
+				_user$project$Lang$TName(
+					{
+						ctor: '_Tuple2',
+						_0: {
+							ctor: '::',
+							_0: 'Basics',
+							_1: {ctor: '[]'}
+						},
+						_1: 'Int'
+					}),
+				_user$project$Lang$TName(
+					{
+						ctor: '_Tuple2',
+						_0: {
+							ctor: '::',
+							_0: 'Basics',
+							_1: {ctor: '[]'}
+						},
 						_1: 'String'
 					}))),
 		_2: A2(
@@ -9195,7 +9614,11 @@ var _user$project$Main$module_ = {
 								_user$project$Lang$Var(
 									{
 										ctor: '_Tuple2',
-										_0: {ctor: '[]'},
+										_0: {
+											ctor: '::',
+											_0: 'Basics',
+											_1: {ctor: '[]'}
+										},
 										_1: '++'
 									}),
 								A3(
@@ -9207,7 +9630,11 @@ var _user$project$Main$module_ = {
 											_user$project$Lang$Var(
 												{
 													ctor: '_Tuple2',
-													_0: {ctor: '[]'},
+													_0: {
+														ctor: '::',
+														_0: 'Basics',
+														_1: {ctor: '[]'}
+													},
 													_1: '=='
 												}),
 											A2(
@@ -9217,7 +9644,11 @@ var _user$project$Main$module_ = {
 													_user$project$Lang$Var(
 														{
 															ctor: '_Tuple2',
-															_0: {ctor: '[]'},
+															_0: {
+																ctor: '::',
+																_0: 'Basics',
+																_1: {ctor: '[]'}
+															},
 															_1: '%'
 														}),
 													_user$project$Lang$Var(
@@ -9243,7 +9674,11 @@ var _user$project$Main$module_ = {
 										_user$project$Lang$Var(
 											{
 												ctor: '_Tuple2',
-												_0: {ctor: '[]'},
+												_0: {
+													ctor: '::',
+													_0: 'Basics',
+													_1: {ctor: '[]'}
+												},
 												_1: '=='
 											}),
 										A2(
@@ -9253,7 +9688,11 @@ var _user$project$Main$module_ = {
 												_user$project$Lang$Var(
 													{
 														ctor: '_Tuple2',
-														_0: {ctor: '[]'},
+														_0: {
+															ctor: '::',
+															_0: 'Basics',
+															_1: {ctor: '[]'}
+														},
 														_1: '%'
 													}),
 												_user$project$Lang$Var(
@@ -9298,7 +9737,11 @@ var _user$project$Main$module_ = {
 						_user$project$Lang$Var(
 							{
 								ctor: '_Tuple2',
-								_0: {ctor: '[]'},
+								_0: {
+									ctor: '::',
+									_0: 'Basics',
+									_1: {ctor: '[]'}
+								},
 								_1: 'toString'
 							}),
 						_user$project$Lang$Var(
@@ -9350,7 +9793,11 @@ var _user$project$Main$module_ = {
 					_user$project$Lang$Var(
 						{
 							ctor: '_Tuple2',
-							_0: {ctor: '[]'},
+							_0: {
+								ctor: '::',
+								_0: 'List',
+								_1: {ctor: '[]'}
+							},
 							_1: '[]'
 						})),
 				A2(
@@ -9360,7 +9807,11 @@ var _user$project$Main$module_ = {
 						_user$project$Lang$Var(
 							{
 								ctor: '_Tuple2',
-								_0: {ctor: '[]'},
+								_0: {
+									ctor: '::',
+									_0: 'Basics',
+									_1: {ctor: '[]'}
+								},
 								_1: '|>'
 							}),
 						A2(
@@ -9413,7 +9864,11 @@ var _user$project$Main$module_ = {
 									_user$project$Lang$Var(
 										{
 											ctor: '_Tuple2',
-											_0: {ctor: '[]'},
+											_0: {
+												ctor: '::',
+												_0: 'List',
+												_1: {ctor: '[]'}
+											},
 											_1: '[]'
 										})),
 								A2(
@@ -9423,7 +9878,11 @@ var _user$project$Main$module_ = {
 										_user$project$Lang$Var(
 											{
 												ctor: '_Tuple2',
-												_0: {ctor: '[]'},
+												_0: {
+													ctor: '::',
+													_0: 'List',
+													_1: {ctor: '[]'}
+												},
 												_1: '::'
 											}),
 										A2(
@@ -9443,7 +9902,11 @@ var _user$project$Main$module_ = {
 												_user$project$Lang$Var(
 													{
 														ctor: '_Tuple2',
-														_0: {ctor: '[]'},
+														_0: {
+															ctor: '::',
+															_0: 'Main',
+															_1: {ctor: '[]'}
+														},
 														_1: 'fizzbuzz'
 													}),
 												_user$project$Lang$Var(
@@ -9455,20 +9918,46 @@ var _user$project$Main$module_ = {
 									_user$project$Lang$Var(
 										{
 											ctor: '_Tuple2',
-											_0: {ctor: '[]'},
+											_0: {
+												ctor: '::',
+												_0: 'List',
+												_1: {ctor: '[]'}
+											},
 											_1: '[]'
 										})))))))
 		},
 		_1: {ctor: '[]'}
 	}
 };
-var _user$project$Main$main = _elm_lang$html$Html$beginnerProgram(
-	{
-		model: {module_: _user$project$Main$module_, show_borders: true, show_qualifiers: true},
-		view: _user$project$View$view,
-		update: _user$project$Main$update
-	})();
 var _user$project$Main$fizzbuzz = function (n) {
+	return (_elm_lang$core$Native_Utils.eq(
+		A2(_elm_lang$core$Basics_ops['%'], n, 3),
+		0) && _elm_lang$core$Native_Utils.eq(
+		A2(_elm_lang$core$Basics_ops['%'], n, 5),
+		0)) ? 'fizzbuzz' : (_elm_lang$core$Native_Utils.eq(
+		A2(_elm_lang$core$Basics_ops['%'], n, 3),
+		0) ? 'fizz' : (_elm_lang$core$Native_Utils.eq(
+		A2(_elm_lang$core$Basics_ops['%'], n, 5),
+		0) ? 'buzz' : _elm_lang$core$Basics$toString(n)));
+};
+var _user$project$Main$main_ = A2(
+	_elm_lang$html$Html$ul,
+	{ctor: '[]'},
+	A2(
+		_elm_lang$core$List$map,
+		function (n) {
+			return A2(
+				_elm_lang$html$Html$li,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(
+						_user$project$Main$fizzbuzz(n)),
+					_1: {ctor: '[]'}
+				});
+		},
+		A2(_elm_lang$core$List$range, 1, 100)));
+var _user$project$Main$fizzbuzz0 = function (n) {
 	var str = A2(
 		_elm_lang$core$Basics_ops['++'],
 		_elm_lang$core$Native_Utils.eq(
@@ -9479,23 +9968,6 @@ var _user$project$Main$fizzbuzz = function (n) {
 			0) ? 'buzz' : '');
 	return _elm_lang$core$String$isEmpty(str) ? _elm_lang$core$Basics$toString(n) : str;
 };
-var _user$project$Main$main_ = A2(
-	_elm_lang$html$Html$div,
-	{ctor: '[]'},
-	A2(
-		_elm_lang$core$List$map,
-		function (n) {
-			return A2(
-				_elm_lang$html$Html$div,
-				{ctor: '[]'},
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html$text(
-						_user$project$Main$fizzbuzz(n)),
-					_1: {ctor: '[]'}
-				});
-		},
-		A2(_elm_lang$core$List$range, 1, 100)));
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
 if (typeof _user$project$Main$main !== 'undefined') {

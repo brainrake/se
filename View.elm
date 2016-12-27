@@ -16,6 +16,7 @@ view model = div []
   , div [ class "config" ] [ view_config model ]
   , div [ class "code" ] [ view_module model.module_ ] ]
 
+
 view_config : Model -> Html Msg
 view_config model = div []
   [ button [ onClick ToggleBorders ] [ text "borders" ]
@@ -56,7 +57,7 @@ view_typ typ = case typ of
 
 view_qname : QualifiedName -> Html Msg
 view_qname (qs, name) = span [ class "qualifiedname" ] <|
-  (qs |> map (\q -> span [ class "qualifier" ] [ text (q ++ ".") ]))
+  (qs |> map (λq -> span [ class "qualifier" ] [ text (q ++ ".") ]))
   ++ [ span [ class "unqualifiedname" ] [ text name ] ]
 
 view_exp : Exp -> Html Msg
@@ -80,7 +81,7 @@ view_exp exp = case exp of
       , span [ class "paren" ] [ text ")" ] ]
     in case f of
       (Apply (Var (qs, fn)) y) ->
-        if (String.uncons fn |> Maybe.map (Tuple.first >> (\c -> isUpper c || isLower c))) ? True
+        if (String.uncons fn |> Maybe.map (Tuple.first >> (λc -> isUpper c || isLower c))) ? True
         then view_apply
         else span [ class "exp apply op" ]
           [ span [ class "paren" ] [ text "(" ]
@@ -99,8 +100,9 @@ view_exp exp = case exp of
     , view_exp then_
     , keyword "else"
     , view_exp else_ ]
-  Case cases -> span [ class "exp case" ] (cases |> map (\(pat, exp) -> span [] [ view_pattern pat, text " => ", view_exp exp ] ))
+  Case cases -> span [ class "exp case" ] (cases |> map (λ(pat, exp) -> span [] [ view_pattern pat, text " => ", view_exp exp ] ))
   Lit lit -> span [ class "exp lit" ] [ view_literal lit ]
+  Dict _ -> text "dict"
 
 
 view_literal : Literal -> Html Msg

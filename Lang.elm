@@ -20,10 +20,12 @@ type Exp =
     | Lit Literal
     | If Exp Exp Exp
     | Case (List (Pattern, Exp))
+    | Dict (List (String, Exp))
 
 type Literal =
       Str String
     | Num Int
+
 
 type Pattern =
       PApply (List Pattern)
