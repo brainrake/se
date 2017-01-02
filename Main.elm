@@ -218,11 +218,9 @@ update msg model = case msg of
   ToggleBorders -> { model | show_borders = not model.show_borders }
   ToggleQualifiers -> { model | show_qualifiers = not model.show_qualifiers }
 
-main : Program Never Model Msg
-main = Html.beginnerProgram
-  { model =
-    { module_ = module_
+init = { module_ = module_
     , show_borders = True
     , show_qualifiers = True }
-  , view = view
-  , update = update }
+
+main : Program Never Model Msg
+main = Html.beginnerProgram { model = init, update = update, view = view }

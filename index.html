@@ -8453,20 +8453,156 @@ var _user$project$Model$Model = F3(
 var _user$project$Model$ToggleQualifiers = {ctor: 'ToggleQualifiers'};
 var _user$project$Model$ToggleBorders = {ctor: 'ToggleBorders'};
 var _user$project$Model$Nop = {ctor: 'Nop'};
+var _user$project$View$bc = function (color) {
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		'border-color: #',
+		A2(_elm_lang$core$Basics_ops['++'], color, ';'));
+};
+var _user$project$View$fg = function (color) {
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		'color: #',
+		A2(_elm_lang$core$Basics_ops['++'], color, ';'));
+};
+var _user$project$View$c = function (color) {
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		_user$project$View$fg(color),
+		_user$project$View$bc(color));
+};
+var _user$project$View$bg = function (color) {
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		'background-color: #',
+		A2(_elm_lang$core$Basics_ops['++'], color, ';'));
+};
+var _user$project$View$base0F = 'EC5F67';
+var _user$project$View$base0E = '82AAFF';
+var _user$project$View$base0D = '89DDFF';
+var _user$project$View$base0C = '80CBC4';
+var _user$project$View$base0B = '8BD649';
+var _user$project$View$base0A = 'FFCC00';
+var _user$project$View$base09 = 'EA9560';
+var _user$project$View$base08 = 'EC5F67';
+var _user$project$View$base07 = 'FFFFFF';
+var _user$project$View$base06 = 'D5DBE5';
+var _user$project$View$base05 = 'CDD3DE';
+var _user$project$View$base04 = 'C9CCD3';
+var _user$project$View$base03 = '707880';
+var _user$project$View$base02 = '37474F';
+var _user$project$View$base01 = '2C393F';
+var _user$project$View$base00 = '263238';
 var _user$project$View$css = function (model) {
 	return A2(
 		_elm_lang$core$Basics_ops['++'],
-		'\n* {\n  font-family: sans;\n}\n\n.code {\n  #width: 600px;\n}\n\nspan {\n  display: inline-block;\n  padding: 1px;\n}\n\n.exp.var {\n  color: black;\n}\n\n.exp.apply, .exp.if, .exp.apply.op, .exp.lam, .binding, .typ.apply, .typ.arrow {\n  color: black;\n  border-width : 0;\n',
+		'\nhtml {\n  font-family: sans;\n  ',
 		A2(
 			_elm_lang$core$Basics_ops['++'],
-			model.show_borders ? '\n  border: 1px solid grey;\n  padding: 2px;\n  margin: 2px;\n  border-radius: 4px;\n' : '',
+			_user$project$View$bg(_user$project$View$base00),
 			A2(
 				_elm_lang$core$Basics_ops['++'],
-				'\n}\n\n.exp.if {\n  color: orange;\n  border-style: dashed;\n  border-color: orange;\n}\n\n.exp.apply.op, .typ.arrow {\n  border-color: lightgrey;\n}\n\n.typ, .typ.name {\n  color: red;\n  border-color: red;\n}\n\n.lit {\n  color: darkcyan;\n  border-color: cyan;\n}\n\n.name, .binding, .exp.lam, .typ.var{\n  color: purple;\n  border-color: purple;\n}\n\n.keyword {\n  color: orange;\n}\n\n.paren {\n  display: none;\n  color: grey;\n}\n\n\n.exp.let {\n  display: inline;\n}\n\n.qualifier {\n  color: grey;\n',
+				'\n  ',
 				A2(
 					_elm_lang$core$Basics_ops['++'],
-					model.show_qualifiers ? 'display:none' : '',
-					'\n}\n\n'))));
+					_user$project$View$fg(_user$project$View$base07),
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						'\n}\n\n.module {\n  #width: 600px;\n}\n\nspan {\n  display: inline-block;\n  padding: 1px;\n  font-family: Sans;\n  font-size: 1.0em;\n  font-style: normal;\n  ',
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							_user$project$View$bg(_user$project$View$base00),
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								'\n\n}\n\ndiv {\n}\n\n.exp.var {\n  ',
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									_user$project$View$fg(_user$project$View$base07),
+									A2(
+										_elm_lang$core$Basics_ops['++'],
+										'\n}\n\n.exp.apply, .exp.if, .exp.apply.op, .exp.lam, .binding, .typ.apply, .typ.arrow {\n  border-width : 0;\n',
+										A2(
+											_elm_lang$core$Basics_ops['++'],
+											model.show_borders ? '\n  border-width: 1px;\n  border-style: solid;\n  padding: 2px;\n  margin: 2px;\n  border-radius: 4px;\n' : '',
+											A2(
+												_elm_lang$core$Basics_ops['++'],
+												'\n}\n\n.binding {\n  padding: 0;\n}\n\n.binding_typ {\n}\n\n.binding_val {\n  margin: 0;\n}\n\n.exp.if {\n  border-width: 0px;\n  margin: 0;\n  padding: 0;\n  ',
+												A2(
+													_elm_lang$core$Basics_ops['++'],
+													_user$project$View$c(_user$project$View$base0A),
+													A2(
+														_elm_lang$core$Basics_ops['++'],
+														'\n  border-style: dashed;\n  border-collapse: collapse;\n}\n\n.exp.if > tr > td {\n  ',
+														A2(
+															_elm_lang$core$Basics_ops['++'],
+															_user$project$View$c(_user$project$View$base0A),
+															A2(
+																_elm_lang$core$Basics_ops['++'],
+																'\n  border-style: dashed;\n  border-width: 1px;\n  border-collapse: collapse;\n  padding: 1px;\n}\n\n.exp.if > tr:hover > td:first-child, .exp.if > tr:hover > td:first-child > span {\n  background-color: transparent;\n}\n\n.exp.if > tr > td > * {\n  margin: 2px;\n}\n\n.exp.apply {\n  ',
+																A2(
+																	_elm_lang$core$Basics_ops['++'],
+																	_user$project$View$bc(_user$project$View$base03),
+																	A2(
+																		_elm_lang$core$Basics_ops['++'],
+																		'\n}\n\n.exp.apply.op {\n  ',
+																		A2(
+																			_elm_lang$core$Basics_ops['++'],
+																			_user$project$View$bc(_user$project$View$base04),
+																			A2(
+																				_elm_lang$core$Basics_ops['++'],
+																				'\n}\n\n.typ, .typ.name {\n  ',
+																				A2(
+																					_elm_lang$core$Basics_ops['++'],
+																					_user$project$View$c(_user$project$View$base0B),
+																					A2(
+																						_elm_lang$core$Basics_ops['++'],
+																						'\n}\n\n.lit {\n  ',
+																						A2(
+																							_elm_lang$core$Basics_ops['++'],
+																							_user$project$View$c(_user$project$View$base06),
+																							A2(
+																								_elm_lang$core$Basics_ops['++'],
+																								'\n  ',
+																								A2(
+																									_elm_lang$core$Basics_ops['++'],
+																									_user$project$View$bg(_user$project$View$base02),
+																									A2(
+																										_elm_lang$core$Basics_ops['++'],
+																										'\n  border-radius: 4px;\n}\n\n.name, .binding, .exp.lam, .typ.var{\n  ',
+																										A2(
+																											_elm_lang$core$Basics_ops['++'],
+																											_user$project$View$c(_user$project$View$base0E),
+																											A2(
+																												_elm_lang$core$Basics_ops['++'],
+																												'\n}\n\n.exp.lam > .name, .typ.var {\n  font-family: Serif;\n  font-style: italic;\n  font-size: 1.2em;\n}\n\n.keyword {\n  ',
+																												A2(
+																													_elm_lang$core$Basics_ops['++'],
+																													_user$project$View$c(_user$project$View$base0A),
+																													A2(
+																														_elm_lang$core$Basics_ops['++'],
+																														'\n}\n\n.paren {\n  display: none;\n  color: grey;\n}\n\n\n.qualifier {\n  color: grey;\n',
+																														A2(
+																															_elm_lang$core$Basics_ops['++'],
+																															model.show_qualifiers ? 'display:none' : '',
+																															A2(
+																																_elm_lang$core$Basics_ops['++'],
+																																'\n}\n\n.exp.var > .qualifiedname > .unqualifiedname {\n  ',
+																																A2(
+																																	_elm_lang$core$Basics_ops['++'],
+																																	_user$project$View$c(_user$project$View$base07),
+																																	A2(
+																																		_elm_lang$core$Basics_ops['++'],
+																																		'\n}\n\n.exp.var > .unqualifiedname, .typ.var {\n  ',
+																																		A2(
+																																			_elm_lang$core$Basics_ops['++'],
+																																			_user$project$View$c(_user$project$View$base0D),
+																																			A2(
+																																				_elm_lang$core$Basics_ops['++'],
+																																				'\n  font-family: Serif;\n  font-style: italic;\n  font-size: 1.2em;\n}\n\ntd {\n  vertical-align: top;\n  padding: 1px;\n  font-family: Sans;\n  font-size: 1.0em;\n  font-style: normal;\n  ',
+																																				A2(
+																																					_elm_lang$core$Basics_ops['++'],
+																																					_user$project$View$bg(_user$project$View$base00),
+																																					'\n}\n\nspan:hover, td:hover {\n  background-color: #354 !important;\n}\n\nspan.name:hover, span.exp.lit:hover, span.exp.var:hover, span.qualifiedname:hover, span.unqualifiedname:hover {\n  background-color: #687 !important;\n}\n\n\n'))))))))))))))))))))))))))))))))))));
 };
 var _user$project$View$keyword = function (str) {
 	return A2(
@@ -8526,7 +8662,20 @@ var _user$project$View$view_literal = function (lit) {
 };
 var _user$project$View$view_qname = function (_p2) {
 	var _p3 = _p2;
-	return A2(
+	var _p5 = _p3._0;
+	var _p4 = _p3._1;
+	return _elm_lang$core$List$isEmpty(_p5) ? A2(
+		_elm_lang$html$Html$span,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('unqualifiedname'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html$text(_p4),
+			_1: {ctor: '[]'}
+		}) : A2(
 		_elm_lang$html$Html$span,
 		{
 			ctor: '::',
@@ -8552,7 +8701,7 @@ var _user$project$View$view_qname = function (_p2) {
 							_1: {ctor: '[]'}
 						});
 				},
-				_p3._0),
+				_p5),
 			{
 				ctor: '::',
 				_0: A2(
@@ -8564,15 +8713,15 @@ var _user$project$View$view_qname = function (_p2) {
 					},
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p3._1),
+						_0: _elm_lang$html$Html$text(_p4),
 						_1: {ctor: '[]'}
 					}),
 				_1: {ctor: '[]'}
 			}));
 };
 var _user$project$View$view_typ = function (typ) {
-	var _p4 = typ;
-	switch (_p4.ctor) {
+	var _p6 = typ;
+	switch (_p6.ctor) {
 		case 'TName':
 			return A2(
 				_elm_lang$html$Html$span,
@@ -8583,7 +8732,7 @@ var _user$project$View$view_typ = function (typ) {
 				},
 				{
 					ctor: '::',
-					_0: _user$project$View$view_qname(_p4._0),
+					_0: _user$project$View$view_qname(_p6._0),
 					_1: {ctor: '[]'}
 				});
 		case 'TVar':
@@ -8596,7 +8745,7 @@ var _user$project$View$view_typ = function (typ) {
 				},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p4._0),
+					_0: _elm_lang$html$Html$text(_p6._0),
 					_1: {ctor: '[]'}
 				});
 		case 'TApply':
@@ -8609,7 +8758,7 @@ var _user$project$View$view_typ = function (typ) {
 				},
 				{
 					ctor: '::',
-					_0: _user$project$View$view_typ(_p4._0),
+					_0: _user$project$View$view_typ(_p6._0),
 					_1: {
 						ctor: '::',
 						_0: A2(
@@ -8626,7 +8775,7 @@ var _user$project$View$view_typ = function (typ) {
 							}),
 						_1: {
 							ctor: '::',
-							_0: _user$project$View$view_typ(_p4._1),
+							_0: _user$project$View$view_typ(_p6._1),
 							_1: {
 								ctor: '::',
 								_0: A2(
@@ -8656,43 +8805,94 @@ var _user$project$View$view_typ = function (typ) {
 				},
 				{
 					ctor: '::',
-					_0: _user$project$View$view_typ(_p4._0),
+					_0: _user$project$View$view_typ(_p6._0),
 					_1: {
 						ctor: '::',
-						_0: _user$project$View$keyword('->'),
+						_0: _user$project$View$keyword('→'),
 						_1: {
 							ctor: '::',
-							_0: _user$project$View$view_typ(_p4._1),
+							_0: _user$project$View$view_typ(_p6._1),
 							_1: {ctor: '[]'}
 						}
 					}
 				});
 	}
 };
-var _user$project$View$view_binding = function (_p5) {
-	var _p6 = _p5;
-	var _p9 = _p6._0;
-	var _p8 = _p6._2;
+var _user$project$View$view_binding = function (_p7) {
+	var _p8 = _p7;
+	var _p11 = _p8._0;
+	var _p10 = _p8._2;
 	return A2(
-		_elm_lang$html$Html$span,
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
 		{
 			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('binding'),
-			_1: {ctor: '[]'}
-		},
-		function () {
-			var _p7 = _p6._1;
-			if (_p7.ctor === 'Just') {
-				return {
+			_0: A2(
+				_elm_lang$html$Html$span,
+				{
 					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$div,
-						{
+					_0: _elm_lang$html$Html_Attributes$class('binding'),
+					_1: {ctor: '[]'}
+				},
+				function () {
+					var _p9 = _p8._1;
+					if (_p9.ctor === 'Just') {
+						return {
 							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('binding_typ'),
-							_1: {ctor: '[]'}
-						},
-						{
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('binding_typ'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$span,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('name'),
+											_1: {ctor: '[]'}
+										},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text(_p11),
+											_1: {ctor: '[]'}
+										}),
+									_1: {
+										ctor: '::',
+										_0: _user$project$View$keyword(':'),
+										_1: {
+											ctor: '::',
+											_0: _user$project$View$view_typ(_p9._0),
+											_1: {
+												ctor: '::',
+												_0: _user$project$View$keyword(''),
+												_1: {ctor: '[]'}
+											}
+										}
+									}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('binding_val'),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: _user$project$View$view_exp(_p10),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
+						};
+					} else {
+						return {
 							ctor: '::',
 							_0: A2(
 								_elm_lang$html$Html$span,
@@ -8703,60 +8903,27 @@ var _user$project$View$view_binding = function (_p5) {
 								},
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text(_p9),
+									_0: _elm_lang$html$Html$text(_p11),
 									_1: {ctor: '[]'}
 								}),
 							_1: {
 								ctor: '::',
-								_0: _user$project$View$keyword(':'),
+								_0: _user$project$View$keyword('='),
 								_1: {
 									ctor: '::',
-									_0: _user$project$View$view_typ(_p7._0),
-									_1: {
-										ctor: '::',
-										_0: _user$project$View$keyword('='),
-										_1: {ctor: '[]'}
-									}
+									_0: _user$project$View$view_exp(_p10),
+									_1: {ctor: '[]'}
 								}
 							}
-						}),
-					_1: {
-						ctor: '::',
-						_0: _user$project$View$view_exp(_p8),
-						_1: {ctor: '[]'}
+						};
 					}
-				};
-			} else {
-				return {
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$span,
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('name'),
-							_1: {ctor: '[]'}
-						},
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html$text(_p9),
-							_1: {ctor: '[]'}
-						}),
-					_1: {
-						ctor: '::',
-						_0: _user$project$View$keyword('='),
-						_1: {
-							ctor: '::',
-							_0: _user$project$View$view_exp(_p8),
-							_1: {ctor: '[]'}
-						}
-					}
-				};
-			}
-		}());
+				}()),
+			_1: {ctor: '[]'}
+		});
 };
 var _user$project$View$view_exp = function (exp) {
-	var _p10 = exp;
-	switch (_p10.ctor) {
+	var _p12 = exp;
+	switch (_p12.ctor) {
 		case 'Let':
 			return A2(
 				_elm_lang$html$Html$span,
@@ -8773,13 +8940,13 @@ var _user$project$View$view_exp = function (exp) {
 						_0: A2(
 							_elm_lang$html$Html$span,
 							{ctor: '[]'},
-							A2(_elm_lang$core$List$map, _user$project$View$view_binding, _p10._0)),
+							A2(_elm_lang$core$List$map, _user$project$View$view_binding, _p12._0)),
 						_1: {
 							ctor: '::',
 							_0: _user$project$View$keyword('in'),
 							_1: {
 								ctor: '::',
-								_0: _user$project$View$view_exp(_p10._1),
+								_0: _user$project$View$view_exp(_p12._1),
 								_1: {ctor: '[]'}
 							}
 						}
@@ -8807,7 +8974,7 @@ var _user$project$View$view_exp = function (exp) {
 							},
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text(_p10._0),
+								_0: _elm_lang$html$Html$text(_p12._0),
 								_1: {ctor: '[]'}
 							}),
 						_1: {
@@ -8826,15 +8993,22 @@ var _user$project$View$view_exp = function (exp) {
 								}),
 							_1: {
 								ctor: '::',
-								_0: _user$project$View$view_exp(_p10._1),
-								_1: {ctor: '[]'}
+								_0: A2(
+									_elm_lang$html$Html$br,
+									{ctor: '[]'},
+									{ctor: '[]'}),
+								_1: {
+									ctor: '::',
+									_0: _user$project$View$view_exp(_p12._1),
+									_1: {ctor: '[]'}
+								}
 							}
 						}
 					}
 				});
 		case 'Apply':
-			var _p15 = _p10._1;
-			var _p14 = _p10._0;
+			var _p17 = _p12._1;
+			var _p16 = _p12._0;
 			var view_apply = A2(
 				_elm_lang$html$Html$span,
 				{
@@ -8858,13 +9032,13 @@ var _user$project$View$view_exp = function (exp) {
 						}),
 					_1: {
 						ctor: '::',
-						_0: _user$project$View$view_exp(_p14),
+						_0: _user$project$View$view_exp(_p16),
 						_1: {
 							ctor: '::',
 							_0: _user$project$View$keyword(' '),
 							_1: {
 								ctor: '::',
-								_0: _user$project$View$view_exp(_p15),
+								_0: _user$project$View$view_exp(_p17),
 								_1: {
 									ctor: '::',
 									_0: A2(
@@ -8885,20 +9059,20 @@ var _user$project$View$view_exp = function (exp) {
 						}
 					}
 				});
-			var _p11 = _p14;
-			if (((_p11.ctor === 'Apply') && (_p11._0.ctor === 'Var')) && (_p11._0._0.ctor === '_Tuple2')) {
-				var _p13 = _p11._0._0._1;
+			var _p13 = _p16;
+			if (((_p13.ctor === 'Apply') && (_p13._0.ctor === 'Var')) && (_p13._0._0.ctor === '_Tuple2')) {
+				var _p15 = _p13._0._0._1;
 				return A2(
 					_elm_community$maybe_extra$Maybe_Extra_ops['?'],
 					A2(
 						_elm_lang$core$Maybe$map,
-						function (_p12) {
+						function (_p14) {
 							return function (c) {
 								return _elm_lang$core$Char$isUpper(c) || _elm_lang$core$Char$isLower(c);
 							}(
-								_elm_lang$core$Tuple$first(_p12));
+								_elm_lang$core$Tuple$first(_p14));
 						},
-						_elm_lang$core$String$uncons(_p13)),
+						_elm_lang$core$String$uncons(_p15)),
 					true) ? view_apply : A2(
 					_elm_lang$html$Html$span,
 					{
@@ -8922,7 +9096,7 @@ var _user$project$View$view_exp = function (exp) {
 							}),
 						_1: {
 							ctor: '::',
-							_0: _user$project$View$view_exp(_p11._1),
+							_0: _user$project$View$view_exp(_p13._1),
 							_1: {
 								ctor: '::',
 								_0: _elm_lang$html$Html$text(' '),
@@ -8930,13 +9104,13 @@ var _user$project$View$view_exp = function (exp) {
 									ctor: '::',
 									_0: _user$project$View$view_exp(
 										_user$project$Lang$Var(
-											{ctor: '_Tuple2', _0: _p11._0._0._0, _1: _p13})),
+											{ctor: '_Tuple2', _0: _p13._0._0._0, _1: _p15})),
 									_1: {
 										ctor: '::',
 										_0: _elm_lang$html$Html$text(' '),
 										_1: {
 											ctor: '::',
-											_0: _user$project$View$view_exp(_p15),
+											_0: _user$project$View$view_exp(_p17),
 											_1: {
 												ctor: '::',
 												_0: A2(
@@ -8972,7 +9146,7 @@ var _user$project$View$view_exp = function (exp) {
 				},
 				{
 					ctor: '::',
-					_0: _user$project$View$view_qname(_p10._0),
+					_0: _user$project$View$view_qname(_p12._0),
 					_1: {ctor: '[]'}
 				});
 		case 'If':
@@ -8985,26 +9159,89 @@ var _user$project$View$view_exp = function (exp) {
 				},
 				{
 					ctor: '::',
-					_0: _user$project$View$keyword('if'),
-					_1: {
-						ctor: '::',
-						_0: _user$project$View$view_exp(_p10._0),
-						_1: {
+					_0: A2(
+						_elm_lang$html$Html$tr,
+						{ctor: '[]'},
+						{
 							ctor: '::',
-							_0: _user$project$View$keyword('then'),
+							_0: A2(
+								_elm_lang$html$Html$td,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _user$project$View$keyword('if'),
+									_1: {ctor: '[]'}
+								}),
 							_1: {
 								ctor: '::',
-								_0: _user$project$View$view_exp(_p10._1),
+								_0: A2(
+									_elm_lang$html$Html$td,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _user$project$View$view_exp(_p12._0),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$tr,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$td,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _user$project$View$keyword('then'),
+										_1: {ctor: '[]'}
+									}),
 								_1: {
 									ctor: '::',
-									_0: _user$project$View$keyword('else'),
+									_0: A2(
+										_elm_lang$html$Html$td,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: _user$project$View$view_exp(_p12._1),
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$tr,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$td,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: _user$project$View$keyword('else'),
+											_1: {ctor: '[]'}
+										}),
 									_1: {
 										ctor: '::',
-										_0: _user$project$View$view_exp(_p10._2),
+										_0: A2(
+											_elm_lang$html$Html$td,
+											{ctor: '[]'},
+											{
+												ctor: '::',
+												_0: _user$project$View$view_exp(_p12._2),
+												_1: {ctor: '[]'}
+											}),
 										_1: {ctor: '[]'}
 									}
-								}
-							}
+								}),
+							_1: {ctor: '[]'}
 						}
 					}
 				});
@@ -9018,26 +9255,26 @@ var _user$project$View$view_exp = function (exp) {
 				},
 				A2(
 					_elm_lang$core$List$map,
-					function (_p16) {
-						var _p17 = _p16;
+					function (_p18) {
+						var _p19 = _p18;
 						return A2(
 							_elm_lang$html$Html$span,
 							{ctor: '[]'},
 							{
 								ctor: '::',
-								_0: _user$project$View$view_pattern(_p17._0),
+								_0: _user$project$View$view_pattern(_p19._0),
 								_1: {
 									ctor: '::',
 									_0: _elm_lang$html$Html$text(' => '),
 									_1: {
 										ctor: '::',
-										_0: _user$project$View$view_exp(_p17._1),
+										_0: _user$project$View$view_exp(_p19._1),
 										_1: {ctor: '[]'}
 									}
 								}
 							});
 					},
-					_p10._0));
+					_p12._0));
 		case 'Lit':
 			return A2(
 				_elm_lang$html$Html$span,
@@ -9048,7 +9285,7 @@ var _user$project$View$view_exp = function (exp) {
 				},
 				{
 					ctor: '::',
-					_0: _user$project$View$view_literal(_p10._0),
+					_0: _user$project$View$view_literal(_p12._0),
 					_1: {ctor: '[]'}
 				});
 		default:
@@ -9057,7 +9294,7 @@ var _user$project$View$view_exp = function (exp) {
 };
 var _user$project$View$view_module = function (bindings) {
 	return A2(
-		_elm_lang$html$Html$span,
+		_elm_lang$html$Html$div,
 		{ctor: '[]'},
 		A2(_elm_lang$core$List$map, _user$project$View$view_binding, bindings));
 };
@@ -9076,7 +9313,7 @@ var _user$project$View$view_config = function (model) {
 				},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text('borders'),
+					_0: _elm_lang$html$Html$text('Boxes'),
 					_1: {ctor: '[]'}
 				}),
 			_1: {
@@ -9090,7 +9327,7 @@ var _user$project$View$view_config = function (model) {
 					},
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text('qualifiers'),
+						_0: _elm_lang$html$Html$text('Full Names'),
 						_1: {ctor: '[]'}
 					}),
 				_1: {ctor: '[]'}
@@ -9133,7 +9370,7 @@ var _user$project$View$view = function (model) {
 						_elm_lang$html$Html$div,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('code'),
+							_0: _elm_lang$html$Html_Attributes$class('module'),
 							_1: {ctor: '[]'}
 						},
 						{
@@ -9562,12 +9799,9 @@ var _user$project$Main$module_ = {
 		_1: {ctor: '[]'}
 	}
 };
+var _user$project$Main$init = {module_: _user$project$Main$module_, show_borders: true, show_qualifiers: true};
 var _user$project$Main$main = _elm_lang$html$Html$beginnerProgram(
-	{
-		model: {module_: _user$project$Main$module_, show_borders: true, show_qualifiers: true},
-		view: _user$project$View$view,
-		update: _user$project$Main$update
-	})();
+	{model: _user$project$Main$init, update: _user$project$Main$update, view: _user$project$View$view})();
 var _user$project$Main$module__ = {
 	ctor: '::',
 	_0: {
