@@ -23,8 +23,10 @@ type Exp =
     | Dict (List (String, Exp))
 
 type Literal =
-      Str String
-    | Num Int
+      String String
+    | Char Char
+    | Int Int
+    | Float Float
 
 
 type Pattern =

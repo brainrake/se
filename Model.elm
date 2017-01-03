@@ -6,9 +6,11 @@ type Msg =
       Nop
     | ToggleBorders
     | ToggleQualifiers
+    | ChangeSrc String
 
 type alias Model =
-  { module_ : Module
-  , show_borders : Bool
+  { show_borders : Bool
   , show_qualifiers : Bool
+  , ast : Module
+  , src : String
   }

@@ -1,7 +1,8 @@
 module View exposing (view)
 
 import Html exposing (Html, div, span, text, pre, button, table, thead, tbody, th, tr, td)
-import Html.Attributes exposing (class, style)
+import Html.Attributes exposing (class, style, rows, cols)
+import Html.Events exposing (onInput)
 import Html.Events exposing (onClick)
 import String exposing (join)
 import List exposing (map, isEmpty)
@@ -13,8 +14,14 @@ import Model exposing (..)
 view : Model -> Html Msg
 view model = div []
   [ Html.node "style" [] [ text (css model) ]
+  --, div [] [ text model.ast ]
+  , div [ class "source" ]
+    [ Html.textarea [ cols 80, rows 12, onInput ChangeSrc ] [ text model.src ]
+    ]
   , div [ class "config" ] [ view_config model ]
-  , div [ class "module" ] [ view_module model.module_ ] ]
+  , div [ class "module" ] [ view_module model.ast]
+  --, div [ class "module" ] [ view_module model.module_ ]
+  ]
 
 
 view_config : Model -> Html Msg
@@ -28,20 +35,27 @@ view_module bindings = div [] (bindings |> map view_binding)
 
 view_binding : Binding -> Html Msg
 view_binding (name, mtyp, exp) = div []
-  [ span [ class "binding" ] <| case mtyp of
+  [ div [ class "binding" ] <| case mtyp of
       Just typ ->
         [ div [ class "binding_typ" ]
           [ span [ class "name" ] [ text name ]
           , keyword ":"
           , view_typ typ
-          , keyword "" ]
+          , keyword ""
+          , span [ style [("color", "#" ++ base02)]] [ text "with " ]
+          , span [ style [("color", "#" ++ base03)]] [ text "Basics, " ]
+          , span [ style [("color", "#" ++ base03)]] [ text "List, " ]
+          , span [ style [("color", "#" ++ base03)]] [ text "Html" ]
+          ]
         , div [ class "binding_val" ] [ view_exp exp ]
         ]
       Nothing ->
         [ span [ class "name" ] [ text name ]
         , keyword "="
         , view_exp exp
-        ] ]
+        ]
+  ]
+
 view_typ : Typ -> Html Msg
 view_typ typ = case typ of
   TName qname -> span [ class "typ name" ] [ view_qname qname ]
@@ -117,8 +131,10 @@ view_exp exp = case exp of
 
 view_literal : Literal -> Html Msg
 view_literal lit = case lit of
-  Str lit -> text ("\"" ++ lit ++ "\"")
-  Num lit -> text (toString lit)
+  String lit -> text ("\"" ++ lit ++ "\"")
+  Char lit -> text ("'" ++ toString lit ++ "'")
+  Int lit -> text (toString lit)
+  Float lit -> text (toString lit)
 
 
 view_pattern : Pattern -> Html Msg
@@ -155,13 +171,14 @@ c color = fg color ++ bc color
 css : Model -> String
 css model = """
 html {
+  background-color: #111;
   font-family: sans;
-  """ ++ bg base00 ++ """
   """ ++ fg base07 ++ """
 }
 
 .module {
-  #width: 600px;
+  --width: 50%;
+  background-color: #000;
 }
 
 span {
@@ -171,10 +188,12 @@ span {
   font-size: 1.0em;
   font-style: normal;
   """ ++ bg base00 ++ """
-
 }
 
-div {
+.module > div > div > div {
+  """ ++ bg base00 ++ """
+  margin-top: 5px;
+  border: 0;
 }
 
 .exp.var {
@@ -299,5 +318,9 @@ span.name:hover, span.exp.lit:hover, span.exp.var:hover, span.qualifiedname:hove
   background-color: #687 !important;
 }
 
+textarea {
+  background-color: black;
+  color: white;
+}
 
 """
