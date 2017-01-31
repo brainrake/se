@@ -19,6 +19,7 @@ type alias Model =
     { ast : Module
     , src : String
     , opts : Options
+    , focus : ()
     }
 
 

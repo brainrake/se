@@ -5,7 +5,7 @@ import Html.Attributes exposing (class, style, rows, cols)
 import Html.Events exposing (onInput)
 import Html.Events exposing (onClick)
 import String exposing (join)
-import List exposing (map, isEmpty)
+import List exposing (map, isEmpty, indexedMap)
 import Char exposing (isUpper, isLower)
 import Maybe.Extra exposing ((?))
 import Lang exposing (..)
@@ -34,135 +34,169 @@ view_config model = div []
 
 
 view_module : Options -> Module -> Html Msg
-view_module opts bindings = div [] (bindings |> map (view_binding opts))
+view_module opts { name, imports, bindings } =
+    div [] (bindings |> map (view_binding opts FPoint))
 
 
-view_binding : Options -> Binding -> Html Msg
-view_binding opts (name, mtyp, exp) = div []
-  [ div [ class "binding" ] <| case mtyp of
-      Just typ ->
-        [ div [ class "binding_typ" ]
-          [ span [ class "name" ] [ text name ]
-          , keyword ":"
-          , view_typ typ
-          , keyword ""
-          , span [ style [("color", "#" ++ base02)]] [ text "with " ]
-          , span [ style [("color", "#" ++ base03)]] [ text "Basics, " ]
-          , span [ style [("color", "#" ++ base03)]] [ text "List, " ]
-          , span [ style [("color", "#" ++ base03)]] [ text "Html" ]
-          ]
-        , div [ class "binding_val" ] [ view_exp opts exp ]
+
+view_binding : Options -> Focus -> Binding -> Html Msg
+view_binding opts here (name, mtyp, exp) =
+    let view_binding_with_typ typ =
+            [ div [ class "binding_typ" ]
+                [ span [ class "name" ] [ text name ]
+                , keyword ":"
+                , view_typ (FBindingTyp here) typ
+                , keyword ""
+                , span [ style [("color", "#" ++ base02)]] [ text "with " ]
+                , span [ style [("color", "#" ++ base03)]] [ text "Basics, " ]
+                , span [ style [("color", "#" ++ base03)]] [ text "List, " ]
+                , span [ style [("color", "#" ++ base03)]] [ text "Html" ]
+                ]
+            , div [ class "binding_val" ] [ view_exp opts (FBindingValue here) exp ]
+            ]
+        view_binding_no_typ =
+            [ span [ class "name" ] [ text name ]
+            , keyword "="
+            , view_exp opts (FBindingValue here) exp
+            ]
+    in div []
+        [ div [ class "binding" ] <|
+            case mtyp of
+                Just typ -> view_binding_with_typ  typ
+                Nothing -> view_binding_no_typ
         ]
-      Nothing ->
-        [ span [ class "name" ] [ text name ]
-        , keyword "="
-        , view_exp opts exp
-        ]
-  ]
-
-view_typ : Typ -> Html Msg
-view_typ typ = case typ of
-  TName qname -> span [ class "typ name" ] [ view_qname qname ]
-  TVar var -> span [ class "typ var" ] [ text var ]
-  TApply t1 t2 -> span [ class "typ apply" ]
-    [ view_typ t1
-    , span [ class "paren" ] [ text " (" ]
-    , view_typ t2
-    , span [ class "paren" ] [ text ") "] ]
-  TArrow t1 t2 -> span [ class "typ arrow" ]
-    [ view_typ t1
-    , keyword "→"
-    , view_typ t2 ]
 
 
-view_qname : QualifiedName -> Html Msg
-view_qname (qs, name) =
-  if isEmpty qs
-  then span [ class "unqualifiedname" ] [ text name ]
-  else
-    span [ class "qualifiedname" ] <|
-    (qs |> map (λq -> span [ class "qualifier" ] [ text (q ++ ".") ]))
-    ++ [ span [ class "unqualifiedname" ] [ text name ] ]
+view_typ : Focus -> Typ -> Html Msg
+view_typ here typ = case typ of
+    TName qname ->
+        span [ class "typ name" ] [ view_qname (FTypName here) qname ]
+    TVar var ->
+        span [ class "typ var" ] [ text var ]
+    TApply t1 t2 ->
+        span [ class "typ apply" ]
+            [ view_typ (FTypApplyFun here) t1
+            , span [ class "paren" ] [ text " (" ]
+            , view_typ (FTypApplyArg here) t2
+            , span [ class "paren" ] [ text ") "]
+            ]
+    TArrow t1 t2 ->
+        span [ class "typ arrow" ]
+            [ view_typ (FTypArrowArg here) t1
+            , keyword "→"
+            , view_typ (FTypArrowResult here) t2
+            ]
 
-view_exp : Options -> Exp -> Html Msg
-view_exp opts exp = case exp of
+
+view_qname : Focus -> QualifiedName -> Html Msg
+view_qname here (qs, name) = case qs of
+  Nothing ->
+    span [ class "unqualifiedname" ] [ text name ]
+  Just qualifier ->
+    span [ class "qualifiedname" ]
+      [ span [ class "qualifier" ] [ text (qualifier ++ ".") ]
+      , span [ class "unqualifiedname" ] [ text name ]
+      ]
+
+
+view_exp : Options -> Focus -> Exp -> Html Msg
+view_exp opts here exp = case exp of
     Let bindings exp ->
         span [ class "exp let" ]
             [ keyword "let"
-            , span [] (bindings |> map (view_binding opts))
+            , span [] (bindings |> indexedMap (\n b ->
+                view_binding opts (FLetBinding n here) b))
             , keyword "in"
-            , view_exp opts exp ]
+            , view_exp opts (FLetExp here) exp
+            ]
     Lam name exp ->
         span [ class "exp lam" ]
             [ keyword "λ"
             , span [ class "name" ] [ text name ]
             , span [ class "keyword" ] [text " → " ]
             , Html.br [] []
-            , view_exp opts exp ]
-    Apply f x ->
-        let view_apply = span [ class "exp apply" ] <|
-            [ span [ class "paren" ] [ text "(" ]
-            , view_exp opts f
-            , keyword " "
-            , view_exp opts x
-            , span [ class "paren" ] [ text ")" ] ]
-        in
-            if not opts.infix
-            then view_apply
-            else case f of
-                (Apply (Var (qs, fn)) y) ->
-                    if (String.uncons fn |> Maybe.map (Tuple.first >> (λc -> isUpper c || isLower c))) ? True
-                    then view_apply
-                    else span [ class "exp apply op" ]
-                        [ span [ class "paren" ] [ text "(" ]
-                        , view_exp opts y
-                        , text " "
-                        , view_exp opts (Var (qs, fn))
-                        , text " "
-                        , view_exp opts x
-                        , span [ class "paren" ] [ text ")" ] ]
-                _ -> view_apply
-    Var qname ->
-        span [ class "exp var" ] [ view_qname qname ]
-    If cond then_ else_ ->
-        span [ class "exp if" ]
-            [ tr []
-                [ td [] [ keyword "if" ]
-                , td [] [ view_exp opts cond ]
-                ]
-            , tr []
-                [ td [] [ keyword "then" ]
-                , td [] [ view_exp opts then_ ]
-                ]
-            , tr []
-                [ td [] [ keyword "else" ]
-                , td [] [ view_exp opts else_ ]
-                ]
+            , view_exp opts (FLamExp here) exp
             ]
-    Case cases ->
-        span [ class "exp case" ] (cases |> map (λ(pat, exp) ->
-        span [] [ view_pattern pat, text " => ", view_exp opts exp ] ))
+    Apply f x ->
+        view_apply opts here f x
+    Var qname ->
+        span [ class "exp var" ] [ view_qname (FVar here) qname ]
+    Case exp cases ->
+        view_patmat opts here exp cases
     Lit lit ->
-        span [ class "exp lit" ] [ view_literal lit ]
-    Dict _ ->
-        text "dict"
+        span [ class "exp lit" ] [ view_literal (FLit here) lit ]
+    Record _ ->
+        text "record"
 
 
-view_literal : Literal -> Html Msg
-view_literal lit = case lit of
-  String lit -> text ("\"" ++ lit ++ "\"")
-  Char lit -> text ("'" ++ toString lit ++ "'")
-  Int lit -> text (toString lit)
-  Float lit -> text (toString lit)
+view_apply : Options -> Focus -> Exp -> Exp -> Html Msg
+view_apply opts here f x =
+    let rendered = span [ class "exp apply" ] <|
+        [ span [ class "paren" ] [ text "(" ]
+        , view_exp opts (FApplyFun here) f
+        , keyword " "
+        , view_exp opts (FApplyArg here) x
+        , span [ class "paren" ] [ text ")" ]
+        ]
+    in case f of
+        (Apply (Var (qs, fn)) y) ->
+            if (String.uncons fn |> Maybe.map (Tuple.first >> (λc -> isUpper c || isLower c))) ? True
+            then rendered
+            else span [ class "exp apply op" ]
+                [ span [ class "paren" ] [ text "(" ]
+                , view_exp opts (FApplyFun (FApplyFun here)) y
+                , text " "
+                , view_exp opts (FApplyFun (FApplyArg here)) (Var (qs, fn))
+                , text " "
+                , view_exp opts (FApplyArg here) x
+                , span [ class "paren" ] [ text ")" ] ]
+        _ -> rendered
 
 
-view_pattern : Pattern -> Html Msg
-view_pattern pattern = span [ class "pattern" ] [ text <| case pattern of
-  PApply ps -> join "\n" (ps |> map toString)
-  PName n -> n ]
+view_patmat : Options -> Focus -> Exp -> List ( Pattern, Exp ) -> Html Msg
+view_patmat opts here exp cases =
+    let view_case n (pat, exp) =
+        tr []
+            [ td [] [ view_pattern (FCasePattern n here) pat, text " → " ]
+            , td [] [ view_exp opts (FCaseResult n here) exp ]
+            ]
+    in table [ class "exp case if" ] <|
+        [ tr []
+            [ td [] [ keyword "case" ]
+            , td [] [ view_exp opts (FCaseExp here) exp ]
+            ]
+        ] ++ (cases |> indexedMap view_case )
+
+
+view_literal : Focus -> Literal -> Html Msg
+view_literal here lit =
+    case lit of
+        String lit -> text ("\"" ++ lit ++ "\"")
+        Char lit -> text ("'" ++ toString lit ++ "'")
+        Int lit -> text (toString lit)
+        Float lit -> text (toString lit)
+
+
+view_pattern : Focus -> Pattern -> Html Msg
+view_pattern here pattern =
+    span [ class "pattern" ] [ text <|
+        case pattern of
+            PApply ps -> join "\n" (ps |> map toString)
+            PCon (q, n) -> n
+            PVar n -> n
+            PLit lit -> toString lit ]
 
 keyword : String -> Html a
-keyword str = span [ class "keyword" ] [ text (" " ++ str ++ " ") ]
+keyword str =
+    span [ class "keyword" ] [ text (" " ++ str ++ " ") ]
+
+{-
+bg color = [("background-color", color)]
+fg color = [("color", color)]
+bc color = [("border-color", color)]
+c color = fg color ++ bc color
+
+-}
 
 base00 = "263238"
 base01 = "2C393F"
