@@ -24,18 +24,33 @@ main = Html.ul [] (List.range 1 100 |> List.map (\\n ->
 """
 
 
+init =
+    { src = fbstr
+    , ast = translate (Ast.parse fbstr)
+    , opts =
+        { show_borders = True
+        , show_qualifiers = True
+        , infix = True
+        }
+    }
+
+
+update_opts : OptionsMsg -> Options -> Options
+update_opts msg opts =
+    case msg of
+        ToggleBorders -> { opts | show_borders = not opts.show_borders }
+        ToggleQualifiers -> { opts | show_qualifiers = not opts.show_qualifiers }
+        ToggleInfix -> { opts | infix = not opts.infix }
+
+
 update : Msg -> Model -> Model
 update msg model = case msg of
-  Nop -> model
-  ChangeSrc src -> { model | src = src, ast = translate (Ast.parse src)}
-  ToggleBorders -> { model | show_borders = not model.show_borders }
-  ToggleQualifiers -> { model | show_qualifiers = not model.show_qualifiers }
-
-init =
-  { show_borders = True
-  , show_qualifiers = True
-  , src = fbstr
-  , ast = translate (Ast.parse fbstr)}
+    Nop ->
+        model
+    ChangeSrc src ->
+        { model | src = src, ast = translate (Ast.parse src)}
+    OptionsMsg optsmsg ->
+        { model | opts = update_opts optsmsg model.opts }
 
 main : Program Never Model Msg
 main = Html.beginnerProgram { model = init, update = update, view = view }
