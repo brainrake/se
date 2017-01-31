@@ -11,6 +11,7 @@ import Maybe.Extra exposing ((?))
 import Lang exposing (..)
 import Model exposing (..)
 
+
 view : Model -> Html Msg
 view model = div []
   [ Html.node "style" [] [ text (css model) ]
@@ -18,23 +19,26 @@ view model = div []
   , div [ class "source" ]
     [ Html.textarea [ cols 80, rows 12, onInput ChangeSrc ] [ text model.src ]
     ]
-  , div [ class "config" ] [ view_config model ]
-  , div [ class "module" ] [ view_module model.ast]
+  , div [ class "config" ] [ view_config model.opts |> Html.map OptionsMsg ]
+  , div [ class "module" ] [ view_module model.opts model.ast ]
   --, div [ class "module" ] [ view_module model.module_ ]
   ]
 
 
-view_config : Model -> Html Msg
+view_config : Options -> Html OptionsMsg
 view_config model = div []
-  [ button [ onClick ToggleBorders ] [ text "Boxes" ]
-  , button [ onClick ToggleQualifiers ] [ text "Full Names" ] ]
+    [ button [ onClick <| ToggleBorders ] [ text "Boxes" ]
+    , button [ onClick <| ToggleQualifiers ] [ text "Full Names" ]
+    , button [ onClick ToggleInfix ] [ text "Infix Operators" ]
+    ]
 
 
-view_module : Module -> Html Msg
-view_module bindings = div [] (bindings |> map view_binding)
+view_module : Options -> Module -> Html Msg
+view_module opts bindings = div [] (bindings |> map (view_binding opts))
 
-view_binding : Binding -> Html Msg
-view_binding (name, mtyp, exp) = div []
+
+view_binding : Options -> Binding -> Html Msg
+view_binding opts (name, mtyp, exp) = div []
   [ div [ class "binding" ] <| case mtyp of
       Just typ ->
         [ div [ class "binding_typ" ]
@@ -47,12 +51,12 @@ view_binding (name, mtyp, exp) = div []
           , span [ style [("color", "#" ++ base03)]] [ text "List, " ]
           , span [ style [("color", "#" ++ base03)]] [ text "Html" ]
           ]
-        , div [ class "binding_val" ] [ view_exp exp ]
+        , div [ class "binding_val" ] [ view_exp opts exp ]
         ]
       Nothing ->
         [ span [ class "name" ] [ text name ]
         , keyword "="
-        , view_exp exp
+        , view_exp opts exp
         ]
   ]
 
@@ -80,53 +84,68 @@ view_qname (qs, name) =
     (qs |> map (λq -> span [ class "qualifier" ] [ text (q ++ ".") ]))
     ++ [ span [ class "unqualifiedname" ] [ text name ] ]
 
-view_exp : Exp -> Html Msg
-view_exp exp = case exp of
-  Let bindings exp -> span [ class "exp let" ]
-    [ keyword "let"
-    , span [] (bindings |> map view_binding)
-    , keyword "in"
-    , view_exp exp ]
-  Lam name exp -> span [ class "exp lam" ]
-    [ keyword "λ"
-    , span [ class "name" ] [ text name ]
-    , span [ class "keyword" ] [text " → " ]
-    , Html.br [] []
-    , view_exp exp ]
-  Apply f x ->
-    let view_apply = span [ class "exp apply" ] <|
-      [ span [ class "paren" ] [ text "(" ]
-      , view_exp f
-      , keyword " "
-      , view_exp x
-      , span [ class "paren" ] [ text ")" ] ]
-    in case f of
-      (Apply (Var (qs, fn)) y) ->
-        if (String.uncons fn |> Maybe.map (Tuple.first >> (λc -> isUpper c || isLower c))) ? True
-        then view_apply
-        else span [ class "exp apply op" ]
-          [ span [ class "paren" ] [ text "(" ]
-          , view_exp y
-          , text " "
-          , view_exp (Var (qs, fn))
-          , text " "
-          , view_exp x
-          , span [ class "paren" ] [ text ")" ] ]
-      _ -> view_apply
-  Var qname -> span [ class "exp var" ] [ view_qname qname ]
-  If cond then_ else_ -> span [ class "exp if" ]
-    [ tr []
-      [ td [] [ keyword "if" ]
-      , td [] [ view_exp cond ] ]
-    , tr []
-      [ td [] [ keyword "then" ]
-      , td [] [ view_exp then_ ] ]
-    , tr []
-      [ td [] [ keyword "else" ]
-      , td [] [ view_exp else_ ] ] ]
-  Case cases -> span [ class "exp case" ] (cases |> map (λ(pat, exp) -> span [] [ view_pattern pat, text " => ", view_exp exp ] ))
-  Lit lit -> span [ class "exp lit" ] [ view_literal lit ]
-  Dict _ -> text "dict"
+view_exp : Options -> Exp -> Html Msg
+view_exp opts exp = case exp of
+    Let bindings exp ->
+        span [ class "exp let" ]
+            [ keyword "let"
+            , span [] (bindings |> map (view_binding opts))
+            , keyword "in"
+            , view_exp opts exp ]
+    Lam name exp ->
+        span [ class "exp lam" ]
+            [ keyword "λ"
+            , span [ class "name" ] [ text name ]
+            , span [ class "keyword" ] [text " → " ]
+            , Html.br [] []
+            , view_exp opts exp ]
+    Apply f x ->
+        let view_apply = span [ class "exp apply" ] <|
+            [ span [ class "paren" ] [ text "(" ]
+            , view_exp opts f
+            , keyword " "
+            , view_exp opts x
+            , span [ class "paren" ] [ text ")" ] ]
+        in
+            if not opts.infix
+            then view_apply
+            else case f of
+                (Apply (Var (qs, fn)) y) ->
+                    if (String.uncons fn |> Maybe.map (Tuple.first >> (λc -> isUpper c || isLower c))) ? True
+                    then view_apply
+                    else span [ class "exp apply op" ]
+                        [ span [ class "paren" ] [ text "(" ]
+                        , view_exp opts y
+                        , text " "
+                        , view_exp opts (Var (qs, fn))
+                        , text " "
+                        , view_exp opts x
+                        , span [ class "paren" ] [ text ")" ] ]
+                _ -> view_apply
+    Var qname ->
+        span [ class "exp var" ] [ view_qname qname ]
+    If cond then_ else_ ->
+        span [ class "exp if" ]
+            [ tr []
+                [ td [] [ keyword "if" ]
+                , td [] [ view_exp opts cond ]
+                ]
+            , tr []
+                [ td [] [ keyword "then" ]
+                , td [] [ view_exp opts then_ ]
+                ]
+            , tr []
+                [ td [] [ keyword "else" ]
+                , td [] [ view_exp opts else_ ]
+                ]
+            ]
+    Case cases ->
+        span [ class "exp case" ] (cases |> map (λ(pat, exp) ->
+        span [] [ view_pattern pat, text " => ", view_exp opts exp ] ))
+    Lit lit ->
+        span [ class "exp lit" ] [ view_literal lit ]
+    Dict _ ->
+        text "dict"
 
 
 view_literal : Literal -> Html Msg
@@ -202,7 +221,7 @@ span {
 
 .exp.apply, .exp.if, .exp.apply.op, .exp.lam, .binding, .typ.apply, .typ.arrow {
   border-width : 0;
-""" ++ (if model.show_borders then """
+""" ++ (if model.opts.show_borders then """
   border-width: 1px;
   border-style: solid;
   padding: 2px;
@@ -287,7 +306,7 @@ span {
 
 .qualifier {
   color: grey;
-""" ++ (if model.show_qualifiers then "display:none" else "") ++ """
+""" ++ (if model.opts.show_qualifiers then "display:none" else "") ++ """
 }
 
 .exp.var > .qualifiedname > .unqualifiedname {
