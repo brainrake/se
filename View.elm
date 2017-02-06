@@ -1,7 +1,7 @@
 module View exposing (view)
 
-import Html exposing (Html, div, span, text, pre, button, table, thead, tbody, th, tr, td)
-import Html.Attributes exposing (class, style, rows, cols)
+import Html exposing (Html, div, span, text, pre, button, table, thead, tbody, th, tr, td, input, label)
+import Html.Attributes exposing (class, style, rows, cols, type_, checked)
 import Html.Events exposing (onInput)
 import Html.Events exposing (onClick)
 import String exposing (join)
@@ -10,27 +10,60 @@ import Char exposing (isUpper, isLower)
 import Maybe.Extra exposing ((?))
 import Lang exposing (..)
 import Model exposing (..)
+import SeColor exposing (..)
 
+
+view_source : String -> Html Msg
+view_source src =
+    Html.textarea
+        [ cols 80
+        , rows 12
+        , style ( bg "black" ++ c "white" )
+        , onInput ChangeSrc
+        ]
+        [ text src ]
+
+
+css_ : String
+css_ = """
+html {
+    background-color: #111;
+    color: """ ++ base07 ++ """;
+    font-family: sans;
+}
+"""
 
 view : Model -> Html Msg
 view model = div []
   [ Html.node "style" [] [ text (css model) ]
+  , Html.node "style" [] [ text css_ ]
+  --""" ++ to_css (fg base07) ++ """
   --, div [] [ text model.ast ]
-  , div [ class "source" ]
-    [ Html.textarea [ cols 80, rows 12, onInput ChangeSrc ] [ text model.src ]
-    ]
+  , div [ class "source" ] [ view_source model.src ]
   , div [ class "config" ] [ view_config model.opts |> Html.map OptionsMsg ]
   , div [ class "module" ] [ view_module model.opts model.ast ]
   --, div [ class "module" ] [ view_module model.module_ ]
   ]
 
 
-view_config : Options -> Html OptionsMsg
-view_config model = div []
-    [ button [ onClick <| ToggleBorders ] [ text "Boxes" ]
-    , button [ onClick <| ToggleQualifiers ] [ text "Full Names" ]
-    , button [ onClick ToggleInfix ] [ text "Infix Operators" ]
+
+checkbox : String -> (Bool -> msg) -> Bool -> Html msg
+checkbox name msg val =
+  label
+    [ style [("padding", "20px")] ]
+    [ input [ type_ "checkbox", onClick <| msg (not val), checked val ] []
+    , text name
     ]
+
+
+view_config : Options -> Html OptionsMsg
+view_config opts =
+    div []
+        [ checkbox "Borders" ShowBorders opts.show_borders
+        , checkbox  "FullNames" ShowQualifiers opts.show_qualifiers
+        , checkbox "Infix Operators" Infix opts.infix
+        , checkbox "snake-case" Snake opts.snake
+        ]
 
 
 view_module : Options -> Module -> Html Msg
@@ -38,14 +71,13 @@ view_module opts { name, imports, bindings } =
     div [] (bindings |> map (view_binding opts FPoint))
 
 
-
 view_binding : Options -> Focus -> Binding -> Html Msg
 view_binding opts here (name, mtyp, exp) =
     let view_binding_with_typ typ =
             [ div [ class "binding_typ" ]
-                [ span [ class "name" ] [ text name ]
+                    [ span [ class "name" ] [ text (snake opts name) ]
                 , keyword ":"
-                , view_typ (FBindingTyp here) typ
+                , view_typ opts (FBindingTyp here) typ
                 , keyword ""
                 , span [ style [("color", "#" ++ base02)]] [ text "with " ]
                 , span [ style [("color", "#" ++ base03)]] [ text "Basics, " ]
@@ -55,7 +87,7 @@ view_binding opts here (name, mtyp, exp) =
             , div [ class "binding_val" ] [ view_exp opts (FBindingValue here) exp ]
             ]
         view_binding_no_typ =
-            [ span [ class "name" ] [ text name ]
+            [ span [ class "name" ] [ text (snake opts name) ]
             , keyword "="
             , view_exp opts (FBindingValue here) exp
             ]
@@ -67,36 +99,47 @@ view_binding opts here (name, mtyp, exp) =
         ]
 
 
-view_typ : Focus -> Typ -> Html Msg
-view_typ here typ = case typ of
+view_typ : Options -> Focus -> Typ -> Html Msg
+view_typ opts here typ = case typ of
     TName qname ->
-        span [ class "typ name" ] [ view_qname (FTypName here) qname ]
+        span [ class "typ name" ] [ view_qname opts (FTypName here) qname ]
     TVar var ->
-        span [ class "typ var" ] [ text var ]
+        span [ class "typ var" ] [ text (snake opts var) ]
     TApply t1 t2 ->
         span [ class "typ apply" ]
-            [ view_typ (FTypApplyFun here) t1
+            [ view_typ opts (FTypApplyFun here) t1
             , span [ class "paren" ] [ text " (" ]
-            , view_typ (FTypApplyArg here) t2
+            , view_typ opts (FTypApplyArg here) t2
             , span [ class "paren" ] [ text ") "]
             ]
     TArrow t1 t2 ->
         span [ class "typ arrow" ]
-            [ view_typ (FTypArrowArg here) t1
+            [ view_typ opts (FTypArrowArg here) t1
             , keyword "→"
-            , view_typ (FTypArrowResult here) t2
+            , view_typ opts (FTypArrowResult here) t2
             ]
 
 
-view_qname : Focus -> QualifiedName -> Html Msg
-view_qname here (qs, name) = case qs of
+view_qname : Options -> Focus -> QualifiedName -> Html Msg
+view_qname opts here (qs, name) = case qs of
   Nothing ->
-    span [ class "unqualifiedname" ] [ text name ]
+    span [ class "unqualifiedname" ] [ text (snake opts name) ]
   Just qualifier ->
     span [ class "qualifiedname" ]
       [ span [ class "qualifier" ] [ text (qualifier ++ ".") ]
-      , span [ class "unqualifiedname" ] [ text name ]
+      , span [ class "unqualifiedname" ] [ text (snake opts name) ]
       ]
+
+snake : Options -> String -> String
+snake opts str =
+    if not opts.snake
+    then str
+    else str
+        |> String.toList
+        |> List.indexedMap (\i c ->
+            if i /= 0 && Char.isUpper c then ['-', Char.toLower c] else [c] )
+        |> List.concat
+        |> String.fromList
 
 
 view_exp : Options -> Focus -> Exp -> Html Msg
@@ -120,7 +163,7 @@ view_exp opts here exp = case exp of
     Apply f x ->
         view_apply opts here f x
     Var qname ->
-        span [ class "exp var" ] [ view_qname (FVar here) qname ]
+        span [ class "exp var" ] [ view_qname opts (FVar here) qname ]
     Case exp cases ->
         view_patmat opts here exp cases
     Lit lit ->
@@ -138,8 +181,8 @@ view_apply opts here f x =
         , view_exp opts (FApplyArg here) x
         , span [ class "paren" ] [ text ")" ]
         ]
-    in case f of
-        (Apply (Var (qs, fn)) y) ->
+    in case ( opts.infix, f ) of
+        ( True, Apply (Var (qs, fn)) y ) ->
             if (String.uncons fn |> Maybe.map (Tuple.first >> (λc -> isUpper c || isLower c))) ? True
             then rendered
             else span [ class "exp apply op" ]
@@ -190,48 +233,21 @@ keyword : String -> Html a
 keyword str =
     span [ class "keyword" ] [ text (" " ++ str ++ " ") ]
 
-{-
-bg color = [("background-color", color)]
-fg color = [("color", color)]
-bc color = [("border-color", color)]
-c color = fg color ++ bc color
-
--}
-
-base00 = "263238"
-base01 = "2C393F"
-base02 = "37474F"
-base03 = "707880"
-base04 = "C9CCD3"
-base05 = "CDD3DE"
-base06 = "D5DBE5"
-base07 = "FFFFFF"
-base08 = "EC5F67"
-base09 = "EA9560"
-base0A = "FFCC00"
-base0B = "8BD649"
-base0C = "80CBC4"
-base0D = "89DDFF"
-base0E = "82AAFF"
-base0F = "EC5F67"
 
 
-bg color = "background-color: #" ++ color ++ ";"
-fg color = "color: #" ++ color ++ ";"
-bc color = "border-color: #" ++ color ++ ";"
-c color = fg color ++ bc color
+to_css : List (String, String) -> String
+to_css style =
+    style
+    |> List.map (\(k, v) -> k ++ ": " ++ v ++ ";\n")
+    |> String.concat
+
 
 css : Model -> String
 css model = """
-html {
-  background-color: #111;
-  font-family: sans;
-  """ ++ fg base07 ++ """
-}
 
 .module {
   --width: 50%;
-  background-color: #000;
+
 }
 
 span {
@@ -240,17 +256,17 @@ span {
   font-family: Sans;
   font-size: 1.0em;
   font-style: normal;
-  """ ++ bg base00 ++ """
+  """ ++ to_css (bg base00) ++ """
 }
 
 .module > div > div > div {
-  """ ++ bg base00 ++ """
+  """ ++ to_css (bg base00) ++ """
   margin-top: 5px;
   border: 0;
 }
 
 .exp.var {
-  """ ++ fg base07 ++ """
+  """ ++ to_css (fg base07) ++ """
 }
 
 .exp.apply, .exp.if, .exp.apply.op, .exp.lam, .binding, .typ.apply, .typ.arrow {
@@ -279,13 +295,13 @@ span {
   border-width: 0px;
   margin: 0;
   padding: 0;
-  """ ++ c base0A ++ """
+  """ ++ to_css (c base0A) ++ """
   border-style: dashed;
   border-collapse: collapse;
 }
 
 .exp.if > tr > td {
-  """ ++ c base0A ++ """
+  """ ++ to_css (c base0A) ++ """
   border-style: dashed;
   border-width: 1px;
   border-collapse: collapse;
@@ -301,25 +317,25 @@ span {
 }
 
 .exp.apply {
-  """ ++ bc base03 ++ """
+  """ ++ to_css (bc base03) ++ """
 }
 
 .exp.apply.op {
-  """ ++ bc base04 ++ """
+  """ ++ to_css (bc base04) ++ """
 }
 
 .typ, .typ.name {
-  """ ++ c base0B ++ """
+  """ ++ to_css (c base0B) ++ """
 }
 
 .lit {
-  """ ++ c base06 ++ """
-  """ ++ bg base02 ++ """
+  """ ++ to_css (c base06) ++ """
+  """ ++ to_css (bg base02) ++ """
   border-radius: 4px;
 }
 
 .name, .binding, .exp.lam, .typ.var{
-  """ ++ c base0E ++ """
+  """ ++ to_css (c base0E) ++ """
 }
 
 .exp.lam > .name, .typ.var {
@@ -329,7 +345,7 @@ span {
 }
 
 .keyword {
-  """ ++ c base0A ++ """
+  """ ++ to_css (c base0A) ++ """
 }
 
 .paren {
@@ -344,11 +360,11 @@ span {
 }
 
 .exp.var > .qualifiedname > .unqualifiedname {
-  """ ++ c base07 ++ """
+  """ ++ to_css (c base07) ++ """
 }
 
 .exp.var > .unqualifiedname, .typ.var {
-  """ ++ c base0D ++ """
+  """ ++ to_css (c base0D) ++ """
   font-family: Serif;
   font-style: italic;
   font-size: 1.2em;
@@ -360,7 +376,7 @@ td {
   font-family: Sans;
   font-size: 1.0em;
   font-style: normal;
-  """ ++ bg base00 ++ """
+  """ ++ to_css (bg base00) ++ """
 }
 
 span:hover, td:hover {
@@ -370,10 +386,4 @@ span:hover, td:hover {
 span.name:hover, span.exp.lit:hover, span.exp.var:hover, span.qualifiedname:hover, span.unqualifiedname:hover {
   background-color: #687 !important;
 }
-
-textarea {
-  background-color: black;
-  color: white;
-}
-
 """

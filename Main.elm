@@ -12,10 +12,10 @@ fbstr : String
 fbstr = """
 main : Html.Html msg
 main = Html.ul [] (List.range 1 100 |> List.map (\\n ->
-  Html.li [] [ Html.text (Main.fizzbuzz n) ]))
+  Html.li [] [ Html.text (Main.fizzBuzz n) ]))
 
-fizzbuzz : Int -> String
-fizzbuzz n = (
+fizzBuzz : Int -> String
+fizzBuzz n = (
     if n % 3 == 0 && n % 5 == 0 then "fizzbuzz"
     else if n % 3 == 0 then "fizz"
     else if n % 5 == 0 then "buzz"
@@ -31,10 +31,10 @@ fizzbuzz n =
       ( True, False ) -> "fizz"
       ( False, True ) -> "buzz"
       ( False, False ) -> Basics.toString n
-
 """
 
 
+init : Model
 init =
     { src = fbstr
     , ast = translate (Ast.parse fbstr)
@@ -43,6 +43,7 @@ init =
         { show_borders = True
         , show_qualifiers = True
         , infix = True
+        , snake = True
         }
     }
 
@@ -50,9 +51,10 @@ init =
 update_opts : OptionsMsg -> Options -> Options
 update_opts msg opts =
     case msg of
-        ToggleBorders -> { opts | show_borders = not opts.show_borders }
-        ToggleQualifiers -> { opts | show_qualifiers = not opts.show_qualifiers }
-        ToggleInfix -> { opts | infix = not opts.infix }
+        ShowBorders x -> { opts | show_borders = x }
+        ShowQualifiers x -> { opts | show_qualifiers = x }
+        Infix x -> { opts | infix = x }
+        Snake x -> { opts | snake = x }
 
 
 update : Msg -> Model -> Model

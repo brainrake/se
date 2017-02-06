@@ -10,9 +10,10 @@ type Msg
 
 
 type OptionsMsg
-    = ToggleQualifiers
-    | ToggleInfix
-    | ToggleBorders
+    = ShowBorders Bool
+    | ShowQualifiers Bool
+    | Infix Bool
+    | Snake Bool
 
 
 type alias Model =
@@ -27,5 +28,5 @@ type alias Options =
     { show_borders : Bool
     , show_qualifiers : Bool
     , infix : Bool
+    , snake : Bool
     }
-
