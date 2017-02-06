@@ -60,14 +60,15 @@ view_config opts =
 
 view_module : Options -> Module -> Html Msg
 view_module opts { name, imports, bindings } =
-    div [] (bindings |> map (view_binding opts FPoint))
+    div [ style (bg base00 ++ [ "margin-top" => "5px"]) ]
+        (bindings |> map (view_binding opts FPoint))
 
 
 view_binding : Options -> Focus -> Binding -> Html Msg
 view_binding opts here (name, mtyp, exp) =
     let view_binding_with_typ typ =
             [ div [ class "binding_typ" ]
-                    [ span [ class "name" ] [ text (snake opts name) ]
+                    [ span [ class "name", style (c base0E) ] [ text (snake opts name) ]
                 , keyword ":"
                 , view_typ opts (FBindingTyp here) typ
                 , keyword ""
@@ -94,9 +95,9 @@ view_binding opts here (name, mtyp, exp) =
 view_typ : Options -> Focus -> Typ -> Html Msg
 view_typ opts here typ = case typ of
     TName qname ->
-        span [ class "typ name" ] [ view_qname opts (FTypName here) qname ]
+        span [ class "typ name", style (c base0B) ] [ view_qname opts (FTypName here) qname ]
     TVar var ->
-        span [ class "typ var" ] [ text (snake opts var) ]
+        span [ class "typ var", style (var_style ++ c base0D) ] [ text (snake opts var) ]
     TApply t1 t2 ->
         span [ class "typ apply" ]
             [ view_typ opts (FTypApplyFun here) t1
@@ -113,16 +114,20 @@ view_typ opts here typ = case typ of
 
 
 view_qname : Options -> Focus -> QualifiedName -> Html Msg
-view_qname opts here (qs, name) = case qs of
-  Nothing ->
-    span [ class "unqualifiedname" ] [ text (snake opts name) ]
-  Just qualifier ->
-    span [ class "qualifiedname" ]
-      [ if opts.qualifiers && qualifier /= "Basics"
-        then span [ class "qualifier" ] [ text (qualifier ++ ".") ]
-        else span [] []
-      , span [ class "unqualifiedname" ] [ text (snake opts name) ]
-      ]
+view_qname opts here (qs, name) =
+    let color = case here of
+        FTypName _ -> base0B
+        _ -> base07
+    in case qs of
+        Nothing ->
+            span [ class "unqualifiedname", style (var_style ++ c base0D) ] [ text (snake opts name) ]
+        Just qualifier ->
+            span [ class "qualifiedname", style (c base03) ]
+                [   if opts.qualifiers && qualifier /= "Basics"
+                    then span [ class "qualifier" ] [ text (qualifier ++ ".") ]
+                    else span [] []
+                , span [ class "unqualifiedname", style (c color) ] [ text (snake opts name) ]
+                ]
 
 snake : Options -> String -> String
 snake opts str =
@@ -138,10 +143,7 @@ snake opts str =
 
 with_border1 : Options -> List ( String, String )
 with_border1 opts =
-    if opts.borders
-    then [ "border-width" => "1px" ]
-    else []
-
+    [ "border-width" => (if opts.borders then "1px" else "0") ]
 
 
 ligature : ( Maybe String, String ) -> ( Maybe String, String )
@@ -149,6 +151,16 @@ ligature ( qs, name ) =
     if name == "|>"
     then ( qs, "▷" )
     else ( qs, name )
+
+
+var_style : List ( String, String )
+var_style =
+    [ "font-family" => "Serif", "font-style" => "italic", "font-size" => "1.2em"]
+
+
+lit_style : List ( String, String )
+lit_style =
+    (c base06) ++ (bg base02) ++ [ "border-radius" => "4px"]
 
 
 view_exp : Options -> Focus -> Exp -> Html Msg
@@ -164,10 +176,10 @@ view_exp opts here exp =
                     , view_exp opts (FLetExp here) exp
                     ]
             Lam name exp ->
-                span [ class "exp lam", style (with_border1 opts) ]
+                span [ class "exp lam", style (border_style ++ c base0E ++ with_border1 opts) ]
                     [ keyword "λ"
-                    , span [ class "name" ] [ text name ]
-                    , span [ class "keyword" ] [text " → " ]
+                    , span [ class "name", style var_style ] [ text name ]
+                    , keyword "→"
                     --, Html.br [] []
                     , view_exp opts (FLamExp here) exp
                     ]
@@ -178,7 +190,7 @@ view_exp opts here exp =
             Case exp cases ->
                 view_patmat opts here exp cases
             Lit lit ->
-                span [ class "exp lit", style (with_border1 opts) ] [ view_literal (FLit here) lit ]
+                span [ class "exp lit", style (lit_style ++ with_border1 opts) ] [ view_literal (FLit here) lit ]
             Record _ ->
                 text "record"
     in it
@@ -214,7 +226,8 @@ view_apply opts here f x =
                 [ lparen opts
                 , view_exp opts (FApplyFun here) f
                 , span [ style (c base03)] [ text "‹" ]
-                , view_exp opts (FApplyArg here) x
+                , span (if opts.parens then [] else maybe_box x)
+                    [ view_exp opts (FApplyArg here) x ]
                 , rparen opts
                 ]
     in case ( opts.infix, f ) of
@@ -223,7 +236,7 @@ view_apply opts here f x =
             then render f x
             else span [ class "exp apply op", style (with_border1 opts) ]
                 [ lparen opts
-                , span (if opts.borders || opts.parens then [] else maybe_box y)
+                , span (if opts.parens then [] else maybe_box y)
                     [ view_exp opts (FApplyFun (FApplyFun here)) y ]
                 --, text " "
                 , span [ style (c base03) ] [ text "›" ]
@@ -231,30 +244,61 @@ view_apply opts here f x =
                     [ view_exp opts (FApplyFun (FApplyArg here)) (Var ( qs, fn )) ]
                 , span [ style (c base03) ] [ text "‹" ]
                 --, text " "
-                , span (if opts.borders || opts.parens then [] else maybe_box x)
+                , span (if opts.parens then [] else maybe_box x)
                     [ view_exp opts (FApplyArg here) x ]
                 , rparen opts
                 ]
         _ -> render f x
 
 
+border_style : List ( String, String )
+border_style =
+    [ "border-style" => "solid"
+    , "--padding" => "2px"
+    , "--padding-top" => "1px"
+    , "--padding-bottom" => "1px"
+    , "--margin" => "2px"
+    , "border-radius" => "4px"
+    ]
 
+pat_arrow_style : List ( String, String )
+pat_arrow_style =
+    [ "display" => "inline-block"
+    , "position" => "absolute"
+    , "right" => "-7px"
+    , "background-color" => "transparent"
+    ]
 
+td_style : List ( String, String )
+td_style =
+    bg base00 ++ c base0A ++
+    [ "vertical-align" => "top"
+    , "padding" => "1px"
+    , "font-family" => "Sans"
+    , "font-size" => "1.0em"
+    , "font-style" => "normal"
+    , "border-style" => "dashed"
+    , "border-width" => "0px"
+    , "border-collapse" => "collapse"
+    , "padding" => "1px"
+    ]
 
 view_patmat : Options -> Focus -> Exp -> List ( Pattern, Exp ) -> Html Msg
 view_patmat opts here exp cases =
     let view_case n (pat, exp) =
         tr []
-            [ td [ style (with_border1 opts ++ [ "position" => "relative" ]) ]
+            [ td [ style (with_border1 opts ++ td_style ++ [ "position" => "relative", "border-right-width" => "1px" ]) ]
                 [ view_pattern (FCasePattern n here) pat
-                , span [ class "arrow", style [ "display" => "inline-block", "position" => "absolute", "right" => "-7px" ] ] [ text " → " ]
+                , span [ class "arrow", style pat_arrow_style ] [ text " → " ]
                 ]
-            , td [ style (with_border1 opts ++ [ "padding-left" => "6px"]) ] [ view_exp opts (FCaseResult n here) exp ]
+            , td [ style (with_border1 opts ++ td_style ++ [ "padding-left" => "6px", "border-top-width" => "1px" ]) ]
+                [ view_exp opts (FCaseResult n here) exp ]
             ]
     in table [ class "exp case if" ] <|
         [ tr []
-            [ td [ style (with_border1 opts ++ [ "vertical-align" => "middle" ]) ] [ keyword "case" ]
-            , td [ style (with_border1 opts) ] [ view_exp opts (FCaseExp here) exp ]
+            [ td [ style (with_border1 opts ++ td_style ++ [ "vertical-align" => "middle", "border-bottom-style" => "solid",
+  "border-bottom-width" => "1px" ]) ] [ keyword "case" ]
+            , td [ style (with_border1 opts ++ td_style) ] [ view_exp opts (FCaseExp here) exp ]
             ]
         ] ++ (cases |> indexedMap view_case )
 
@@ -279,7 +323,7 @@ view_pattern here pattern =
 
 keyword : String -> Html a
 keyword str =
-    span [ class "keyword" ] [ text (" " ++ str ++ " ") ]
+    span [ class "keyword", style (c base0A) ] [ text (" " ++ str ++ " ") ]
 
 
 
@@ -302,157 +346,5 @@ html {
 span {
   display: inline-block;
   padding: 1px;
-  font-family: Sans;
-  font-size: 1.0em;
-  font-style: normal;
-  """ ++ to_css (bg base00) ++ """
-}
-
-.module > div > div > div {
-  """ ++ to_css (bg base00) ++ """
-  margin-top: 5px;
-  border: 0;
-}
-
-.exp.var {
-  """ ++ to_css (fg base07) ++ """
-}
-
-.exp.apply, .exp.if, .exp.apply.op, .exp.lam, .binding, .typ.apply, .typ.arrow {
-  border-width : 0;
-  border-style: solid;
-  padding: 2px;
-  padding-top: 1px;
-  padding-bottom: 1px;
-  margin: 2px;
-  border-radius: 4px;
-}
-
-.binding {
-  padding: 0;
-}
-
-.binding_val {
-  margin: 0;
-}
-
-.exp.if {
-  border-width: 0px;
-  margin: 0;
-  padding: 0;
-  """ ++ to_css (c base0A) ++ """
-  border-style: dashed;
-  border-collapse: collapse;
-}
-
-.exp.if > tr > td {
-  """ ++ to_css (c base0A) ++ """
-  border-style: dashed;
-  border-width: 0px;
-  border-collapse: collapse;
-  --margin: 2px;
-  padding: 1px;
-}
-
-.exp.if > tr > td:first-child {
-  border-right-width: 1px;
-}
-
-.exp.if > tr:first-child > td {
-  border-bottom-style: solid;
-  border-bottom-width: 1px;
-}
-.exp.if > tr:first-child > td:first-child {
-  border-right-style: none;
-}
-
-
-.exp.if > tr > td {
-  border-bottom-width: 1px;
-}
-.exp.if > tr:last-child > td {
-  border-bottom-width: 0px;
-}
-
-.exp.if > tr:nth_child(2) > td {
-  border-top-style: solid;
-}
-
-
-.exp.if > tr:hover > td:first-child, .exp.if > tr:hover > td:first-child > span {
-  background-color: transparent;
-}
-
-span.arrow {
-  background-color: transparent;
-}
-
-.exp.if > tr > td > * {
-  margin: 2px;
-}
-
-.exp.apply {
-  """ ++ to_css (bc base03) ++ """
-}
-
-.exp.apply.op {
-  """ ++ to_css (bc base04) ++ """
-}
-
-.typ, .typ.name {
-  """ ++ to_css (c base0B) ++ """
-}
-
-.lit {
-  """ ++ to_css (c base06) ++ """
-  """ ++ to_css (bg base02) ++ """
-  border-radius: 4px;
-}
-
-.name, .binding, .exp.lam, .typ.var{
-  """ ++ to_css (c base0E) ++ """
-}
-
-.exp.lam > .name, .typ.var {
-  font-family: Serif;
-  font-style: italic;
-  font-size: 1.2em;
-}
-
-.keyword {
-  """ ++ to_css (c base0A) ++ """
-}
-
-
-.qualifier {
-  color: grey;
-}
-
-.exp.var > .qualifiedname > .unqualifiedname {
-  """ ++ to_css (c base07) ++ """
-}
-
-.exp.var > .unqualifiedname, .typ.var {
-  """ ++ to_css (c base0D) ++ """
-  font-family: Serif;
-  font-style: italic;
-  font-size: 1.2em;
-}
-
-td {
-  vertical-align: top;
-  padding: 1px;
-  font-family: Sans;
-  font-size: 1.0em;
-  font-style: normal;
-  """ ++ to_css (bg base00) ++ """
-}
-
-span:hover, td:hover {
-  background-color: #354 !important;
-}
-
-span.name:hover, span.exp.lit:hover, span.exp.var:hover, span.qualifiedname:hover, span.unqualifiedname:hover {
-  background-color: #687 !important;
 }
 """
