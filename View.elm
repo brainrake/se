@@ -11,6 +11,7 @@ import Maybe.Extra exposing ((?))
 import Lang exposing (..)
 import Model exposing (..)
 import SeColor exposing (..)
+import Basics.Extra exposing (..)
 
 
 view_source : String -> Html Msg
@@ -24,22 +25,11 @@ view_source src =
         [ text src ]
 
 
-css_ : String
-css_ = """
-html {
-    background-color: #111;
-    color: """ ++ base07 ++ """;
-    font-family: sans;
-}
-"""
-
 view : Model -> Html Msg
 view model = div []
-  [ Html.node "style" [] [ text (css model) ]
-  , Html.node "style" [] [ text css_ ]
-  --""" ++ to_css (fg base07) ++ """
-  --, div [] [ text model.ast ]
-  , div [ class "source" ] [ view_source model.src ]
+  [ Html.node "style" [] [ text css_ ]
+  --, div [] [ text (toString model.ast) ]
+  , div [ class "source" ] (if model.opts.source then [ view_source model.src ] else [])
   , div [ class "config" ] [ view_config model.opts |> Html.map OptionsMsg ]
   , div [ class "module" ] [ view_module model.opts model.ast ]
   --, div [ class "module" ] [ view_module model.module_ ]
@@ -59,9 +49,11 @@ checkbox name msg val =
 view_config : Options -> Html OptionsMsg
 view_config opts =
     div []
-        [ checkbox "Borders" ShowBorders opts.show_borders
-        , checkbox  "FullNames" ShowQualifiers opts.show_qualifiers
-        , checkbox "Infix Operators" Infix opts.infix
+        [ checkbox "source" Source opts.source
+        , checkbox "borders" Borders opts.borders
+        , checkbox "parens" Parens opts.parens
+        , checkbox "full names" Qualifiers opts.qualifiers
+        , checkbox "infix operators" Infix opts.infix
         , checkbox "snake-case" Snake opts.snake
         ]
 
@@ -79,10 +71,10 @@ view_binding opts here (name, mtyp, exp) =
                 , keyword ":"
                 , view_typ opts (FBindingTyp here) typ
                 , keyword ""
-                , span [ style [("color", "#" ++ base02)]] [ text "with " ]
-                , span [ style [("color", "#" ++ base03)]] [ text "Basics, " ]
-                , span [ style [("color", "#" ++ base03)]] [ text "List, " ]
-                , span [ style [("color", "#" ++ base03)]] [ text "Html" ]
+                , span [ style (c base02) ] [ text "with " ]
+                , span [ style (c base03) ] [ text "Basics, " ]
+                , span [ style (c base03) ] [ text "List, " ]
+                , span [ style (c base03) ] [ text "Html" ]
                 ]
             , div [ class "binding_val" ] [ view_exp opts (FBindingValue here) exp ]
             ]
@@ -108,9 +100,9 @@ view_typ opts here typ = case typ of
     TApply t1 t2 ->
         span [ class "typ apply" ]
             [ view_typ opts (FTypApplyFun here) t1
-            , span [ class "paren" ] [ text " (" ]
+            , lparen opts
             , view_typ opts (FTypApplyArg here) t2
-            , span [ class "paren" ] [ text ") "]
+            , rparen opts
             ]
     TArrow t1 t2 ->
         span [ class "typ arrow" ]
@@ -126,7 +118,9 @@ view_qname opts here (qs, name) = case qs of
     span [ class "unqualifiedname" ] [ text (snake opts name) ]
   Just qualifier ->
     span [ class "qualifiedname" ]
-      [ span [ class "qualifier" ] [ text (qualifier ++ ".") ]
+      [ if opts.qualifiers && qualifier /= "Basics"
+        then span [ class "qualifier" ] [ text (qualifier ++ ".") ]
+        else span [] []
       , span [ class "unqualifiedname" ] [ text (snake opts name) ]
       ]
 
@@ -142,71 +136,125 @@ snake opts str =
         |> String.fromList
 
 
-view_exp : Options -> Focus -> Exp -> Html Msg
-view_exp opts here exp = case exp of
-    Let bindings exp ->
-        span [ class "exp let" ]
-            [ keyword "let"
-            , span [] (bindings |> indexedMap (\n b ->
-                view_binding opts (FLetBinding n here) b))
-            , keyword "in"
-            , view_exp opts (FLetExp here) exp
-            ]
-    Lam name exp ->
-        span [ class "exp lam" ]
-            [ keyword "λ"
-            , span [ class "name" ] [ text name ]
-            , span [ class "keyword" ] [text " → " ]
-            , Html.br [] []
-            , view_exp opts (FLamExp here) exp
-            ]
-    Apply f x ->
-        view_apply opts here f x
-    Var qname ->
-        span [ class "exp var" ] [ view_qname opts (FVar here) qname ]
-    Case exp cases ->
-        view_patmat opts here exp cases
-    Lit lit ->
-        span [ class "exp lit" ] [ view_literal (FLit here) lit ]
-    Record _ ->
-        text "record"
+with_border1 : Options -> List ( String, String )
+with_border1 opts =
+    if opts.borders
+    then [ "border-width" => "1px" ]
+    else []
 
+
+
+ligature : ( Maybe String, String ) -> ( Maybe String, String )
+ligature ( qs, name ) =
+    if name == "|>"
+    then ( qs, "▷" )
+    else ( qs, name )
+
+
+view_exp : Options -> Focus -> Exp -> Html Msg
+view_exp opts here exp =
+    let
+        it = case exp of
+            Let bindings exp ->
+                span [ class "exp let", style (with_border1 opts) ]
+                    [ keyword "let"
+                    , span [] (bindings |> indexedMap (\n b ->
+                        view_binding opts (FLetBinding n here) b))
+                    , keyword "in"
+                    , view_exp opts (FLetExp here) exp
+                    ]
+            Lam name exp ->
+                span [ class "exp lam", style (with_border1 opts) ]
+                    [ keyword "λ"
+                    , span [ class "name" ] [ text name ]
+                    , span [ class "keyword" ] [text " → " ]
+                    --, Html.br [] []
+                    , view_exp opts (FLamExp here) exp
+                    ]
+            Apply f x ->
+                view_apply opts here f x
+            Var qname ->
+                span [ class "exp var", style (with_border1 opts) ] [ view_qname opts (FVar here) (ligature qname) ]
+            Case exp cases ->
+                view_patmat opts here exp cases
+            Lit lit ->
+                span [ class "exp lit", style (with_border1 opts) ] [ view_literal (FLit here) lit ]
+            Record _ ->
+                text "record"
+    in it
+
+
+maybe_box : Exp -> List (Html.Attribute Msg)
+maybe_box exp =
+    case exp of
+        Var _ -> []
+        Lit _ -> []
+        _ -> [ style ["border" => ("1px solid " ++ base03), "border-radius" => "4px" ] ]
+
+
+paren : String -> Options -> Html Msg
+paren str opts =
+    span [ style (c base03) ] [ text (if opts.parens then str else "") ]
+
+lparen : Options -> Html Msg
+lparen = paren "("
+
+rparen : Options -> Html Msg
+rparen = paren ")"
+
+
+is_infix : String -> Bool
+is_infix fn =
+    (String.uncons fn |> Maybe.map (Tuple.first >> (λc -> isUpper c || isLower c))) ? True
 
 view_apply : Options -> Focus -> Exp -> Exp -> Html Msg
 view_apply opts here f x =
-    let rendered = span [ class "exp apply" ] <|
-        [ span [ class "paren" ] [ text "(" ]
-        , view_exp opts (FApplyFun here) f
-        , keyword " "
-        , view_exp opts (FApplyArg here) x
-        , span [ class "paren" ] [ text ")" ]
-        ]
+    let render f x =
+            span [ class "exp apply" , style (with_border1 opts) ] <|
+                [ lparen opts
+                , view_exp opts (FApplyFun here) f
+                , span [ style (c base03)] [ text "‹" ]
+                , view_exp opts (FApplyArg here) x
+                , rparen opts
+                ]
     in case ( opts.infix, f ) of
         ( True, Apply (Var (qs, fn)) y ) ->
-            if (String.uncons fn |> Maybe.map (Tuple.first >> (λc -> isUpper c || isLower c))) ? True
-            then rendered
-            else span [ class "exp apply op" ]
-                [ span [ class "paren" ] [ text "(" ]
-                , view_exp opts (FApplyFun (FApplyFun here)) y
-                , text " "
-                , view_exp opts (FApplyFun (FApplyArg here)) (Var (qs, fn))
-                , text " "
-                , view_exp opts (FApplyArg here) x
-                , span [ class "paren" ] [ text ")" ] ]
-        _ -> rendered
+            if is_infix fn
+            then render f x
+            else span [ class "exp apply op", style (with_border1 opts) ]
+                [ lparen opts
+                , span (if opts.borders || opts.parens then [] else maybe_box y)
+                    [ view_exp opts (FApplyFun (FApplyFun here)) y ]
+                --, text " "
+                , span [ style (c base03) ] [ text "›" ]
+                , span [ style (bc base03 ++ ["border-width" => "1px"])]
+                    [ view_exp opts (FApplyFun (FApplyArg here)) (Var ( qs, fn )) ]
+                , span [ style (c base03) ] [ text "‹" ]
+                --, text " "
+                , span (if opts.borders || opts.parens then [] else maybe_box x)
+                    [ view_exp opts (FApplyArg here) x ]
+                , rparen opts
+                ]
+        _ -> render f x
+
+
+
 
 
 view_patmat : Options -> Focus -> Exp -> List ( Pattern, Exp ) -> Html Msg
 view_patmat opts here exp cases =
     let view_case n (pat, exp) =
         tr []
-            [ td [] [ view_pattern (FCasePattern n here) pat, text " → " ]
-            , td [] [ view_exp opts (FCaseResult n here) exp ]
+            [ td [ style (with_border1 opts ++ [ "position" => "relative" ]) ]
+                [ view_pattern (FCasePattern n here) pat
+                , span [ class "arrow", style [ "display" => "inline-block", "position" => "absolute", "right" => "-7px" ] ] [ text " → " ]
+                ]
+            , td [ style (with_border1 opts ++ [ "padding-left" => "6px"]) ] [ view_exp opts (FCaseResult n here) exp ]
             ]
     in table [ class "exp case if" ] <|
         [ tr []
-            [ td [] [ keyword "case" ]
-            , td [] [ view_exp opts (FCaseExp here) exp ]
+            [ td [ style (with_border1 opts ++ [ "vertical-align" => "middle" ]) ] [ keyword "case" ]
+            , td [ style (with_border1 opts) ] [ view_exp opts (FCaseExp here) exp ]
             ]
         ] ++ (cases |> indexedMap view_case )
 
@@ -222,7 +270,7 @@ view_literal here lit =
 
 view_pattern : Focus -> Pattern -> Html Msg
 view_pattern here pattern =
-    span [ class "pattern" ] [ text <|
+    span [ class "pattern", style (fg base07 ++ bg base02 ++ [ "margin-right" => "8px"]) ] [ text <|
         case pattern of
             PApply ps -> join "\n" (ps |> map toString)
             PCon (q, n) -> n
@@ -242,12 +290,13 @@ to_css style =
     |> String.concat
 
 
-css : Model -> String
-css model = """
 
-.module {
-  --width: 50%;
-
+css_ : String
+css_ = """
+html {
+    background-color: #111;
+    color: """ ++ base07 ++ """;
+    font-family: sans;
 }
 
 span {
@@ -271,20 +320,16 @@ span {
 
 .exp.apply, .exp.if, .exp.apply.op, .exp.lam, .binding, .typ.apply, .typ.arrow {
   border-width : 0;
-""" ++ (if model.opts.show_borders then """
-  border-width: 1px;
   border-style: solid;
   padding: 2px;
+  padding-top: 1px;
+  padding-bottom: 1px;
   margin: 2px;
   border-radius: 4px;
-""" else "") ++ """
 }
 
 .binding {
   padding: 0;
-}
-
-.binding_typ {
 }
 
 .binding_val {
@@ -303,12 +348,42 @@ span {
 .exp.if > tr > td {
   """ ++ to_css (c base0A) ++ """
   border-style: dashed;
-  border-width: 1px;
+  border-width: 0px;
   border-collapse: collapse;
+  --margin: 2px;
   padding: 1px;
 }
 
+.exp.if > tr > td:first-child {
+  border-right-width: 1px;
+}
+
+.exp.if > tr:first-child > td {
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+}
+.exp.if > tr:first-child > td:first-child {
+  border-right-style: none;
+}
+
+
+.exp.if > tr > td {
+  border-bottom-width: 1px;
+}
+.exp.if > tr:last-child > td {
+  border-bottom-width: 0px;
+}
+
+.exp.if > tr:nth_child(2) > td {
+  border-top-style: solid;
+}
+
+
 .exp.if > tr:hover > td:first-child, .exp.if > tr:hover > td:first-child > span {
+  background-color: transparent;
+}
+
+span.arrow {
   background-color: transparent;
 }
 
@@ -348,15 +423,9 @@ span {
   """ ++ to_css (c base0A) ++ """
 }
 
-.paren {
-  display: none;
-  color: grey;
-}
-
 
 .qualifier {
   color: grey;
-""" ++ (if model.opts.show_qualifiers then "display:none" else "") ++ """
 }
 
 .exp.var > .qualifiedname > .unqualifiedname {

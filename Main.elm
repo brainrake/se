@@ -40,8 +40,10 @@ init =
     , ast = translate (Ast.parse fbstr)
     , focus = ()
     , opts =
-        { show_borders = True
-        , show_qualifiers = True
+        { source = False
+        , borders = False
+        , parens = False
+        , qualifiers = False
         , infix = True
         , snake = True
         }
@@ -51,8 +53,10 @@ init =
 update_opts : OptionsMsg -> Options -> Options
 update_opts msg opts =
     case msg of
-        ShowBorders x -> { opts | show_borders = x }
-        ShowQualifiers x -> { opts | show_qualifiers = x }
+        Source x -> { opts | source = x }
+        Borders x -> { opts | borders = x }
+        Parens x -> { opts | parens = x }
+        Qualifiers x -> { opts | qualifiers = x }
         Infix x -> { opts | infix = x }
         Snake x -> { opts | snake = x }
 

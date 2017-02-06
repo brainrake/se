@@ -10,8 +10,10 @@ type Msg
 
 
 type OptionsMsg
-    = ShowBorders Bool
-    | ShowQualifiers Bool
+    = Source Bool
+    | Borders Bool
+    | Parens Bool
+    | Qualifiers Bool
     | Infix Bool
     | Snake Bool
 
@@ -25,8 +27,10 @@ type alias Model =
 
 
 type alias Options =
-    { show_borders : Bool
-    , show_qualifiers : Bool
+    { source : Bool
+    , borders : Bool
+    , parens : Bool
+    , qualifiers : Bool
     , infix : Bool
     , snake : Bool
     }
