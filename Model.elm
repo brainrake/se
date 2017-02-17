@@ -7,6 +7,7 @@ type Msg
     = Nop
     | OptionsMsg OptionsMsg
     | ChangeSrc String
+    | ChangeCursor (List Focus)
 
 
 type OptionsMsg
@@ -22,7 +23,15 @@ type alias Model =
     { ast : Module
     , src : String
     , opts : Options
-    , focus : ()
+    , cursor : List Focus
+    }
+
+init_model : Model
+init_model =
+    { ast = init_module
+    , src = ""
+    , opts = init_opts
+    , cursor = []
     }
 
 
@@ -33,4 +42,14 @@ type alias Options =
     , qualifiers : Bool
     , infix : Bool
     , snake : Bool
+    }
+
+init_opts : Options
+init_opts =
+    { source = False
+    , borders = False
+    , parens = False
+    , qualifiers = False
+    , infix = True
+    , snake = True
     }

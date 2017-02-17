@@ -11,13 +11,48 @@ import Maybe.Extra exposing ((?))
 import Lang exposing (..)
 import Model exposing (..)
 import Basics.Extra exposing ((=>))
+import DictList exposing (DictList)
 import SeColor exposing (..)
 import SeRender exposing (..)
 
 
 
-type alias Context = ( Options, Focus )
+type alias Context =
+    { opts : Options
+    , here : List Focus
+    , cursor : List Focus
+    }
 
+init_ctx : Context
+init_ctx =
+    { opts = init_opts
+    , here = []
+    , cursor = []
+    }
+
+
+
+zoom : Focus -> Context -> Context
+zoom focus ctx =
+    { ctx
+    | here = focus :: ctx.here
+    , cursor = case ctx.cursor  of
+        [] -> []
+        x :: xs -> if x == focus then xs else []
+    }
+
+cursor_msgs : Context -> List (Html.Attribute Msg)
+cursor_msgs ctx =
+    [ Html.Events.onMouseEnter (ChangeCursor (List.reverse (FPoint :: ctx.here)))
+    , Html.Events.onMouseLeave (ChangeCursor (List.reverse (FPoint :: (List.tail ctx.here ? []))))
+    ]
+
+cursor_style : Context -> List ( String, String )
+cursor_style ctx =
+    case ctx.cursor of
+        FPoint :: [] -> ["opacity" => "1", "background-color" => "#696", "border-color" => "#afa"]
+        _ :: _ -> ["opacity" => "1", "border-color" => "#696", "border-width" => "1px"]
+        _ -> [] --["opacity" => "0.7"]
 
 view_source : String -> Html Msg
 view_source src =
@@ -31,14 +66,21 @@ view_source src =
 
 
 view : Model -> Html Msg
-view model = div []
-  [ Html.node "style" [] [ text css_ ]
-  --, div [] [ text (toString model.ast) ]
-  , div [ class "source" ] (if model.opts.source then [ view_source model.src ] else [])
-  , div [ class "config" ] [ view_config model.opts |> Html.map OptionsMsg ]
-  , div [ class "module" ] [ view_module model.opts model.ast ]
-  --, div [ class "module" ] [ view_module model.module_ ]
-  ]
+view model =
+    div []
+        [ Html.node "style" [] [ text css_ ]
+        --, div [] [ text (toString model.ast) ]
+        , div [] (if model.opts.source then [ view_source model.src ] else [])
+        , div [] [ view_config model.opts |> Html.map OptionsMsg ]
+        , div [ Html.Events.onMouseLeave (ChangeCursor []) ] [ view_module
+            { init_ctx
+            | opts = model.opts
+            , cursor = model.cursor
+            }
+            model.ast ]
+        , div [] [ text (toString model.cursor) ]
+        --, div [ class "module" ] [ view_module model.module_ ]
+        ]
 
 
 
@@ -63,75 +105,84 @@ view_config opts =
         ]
 
 
-view_module : Options -> Module -> Html Msg
-view_module opts { name, imports, bindings } =
+view_module : Context -> Module -> Html Msg
+view_module ctx { name, imports, bindings  } =
     div [ style (bg base00 ++ [ "margin-top" => "5px"]) ]
-        (bindings |> map (view_binding (opts, FPoint)))
+        [ (bindings |> view_bindings ctx ) ]
 
 
-view_binding : Context -> Binding -> Html Msg
-view_binding (opts, here) (name, mtyp, exp) =
-    let view_binding_with_typ typ =
+view_bindings : Context -> Bindings -> Html Msg
+view_bindings ctx bindings =
+    let view_binding_with_typ typ n name exp =
             [ div [ class "binding_typ" ]
-                    [ span [ class "name", style (c base0E) ] [ text (snake opts name) ]
+                    [ span [ class "name", style (c base0E) ] [ text (snake ctx.opts name) ]
                 , keyword ":"
-                , view_typ ( opts, FBindingTyp here ) typ
+                , view_typ (zoom FBindingTyp ctx) typ
                 , keyword ""
                 , span [ style (c base02) ] [ text "with " ]
                 , span [ style (c base03) ] [ text "Basics, " ]
                 , span [ style (c base03) ] [ text "List, " ]
                 , span [ style (c base03) ] [ text "Html" ]
                 ]
-            , div [ class "binding_val" ] [ view_exp ( opts, FBindingValue here ) exp ]
+            , div [ class "binding_val" ] [ view_exp (zoom FBindingValue ctx) exp ]
             ]
-        view_binding_no_typ =
-            [ span [ class "name" ] [ text (snake opts name) ]
+        view_binding_no_typ n name exp =
+            [ span [ class "name" ] [ text (snake ctx.opts name) ]
             , keyword "="
-            , view_exp ( opts, FBindingValue here) exp
+            , view_exp (zoom FBindingValue ctx) exp
             ]
-    in div []
-        [ div [ class "binding" ] <|
-            case mtyp of
-                Just typ -> view_binding_with_typ  typ
-                Nothing -> view_binding_no_typ
-        ]
+    in div [ style (cursor_style ctx) ] <| (
+        bindings
+        |> DictList.indexedMap (\n name ( mtyp, exp ) ->
+            div [ style ["border" => "6px solid black"]] <|
+                case mtyp of
+                    Just typ -> view_binding_with_typ typ n name exp
+                    Nothing -> view_binding_no_typ n name exp
+        )
+        |> DictList.toList
+        |> List.map Tuple.second
+    )
+
 
 
 view_typ : Context -> Typ -> Html Msg
-view_typ (opts, here) typ = case typ of
-    TName qname ->
-        span [ class "typ name", style (c base0B) ] [ view_qname ( opts, FTypName here ) qname ]
+view_typ ctx typ = case typ of
+    TCons qname [] ->
+        span (cursor_msgs ctx ++ [ style (c base0B ++ cursor_style ctx) ])
+            [ view_qname (zoom FTypName ctx) qname ]
+    TCons qname args ->
+        span (cursor_msgs ctx)
+            [ lparen ctx.opts
+            , view_qname (zoom FTypName ctx) qname
+            , span [] <| (args |> map (view_typ (zoom FTypApplyArg ctx)))
+            , rparen ctx.opts
+            ]
     TVar var ->
-        span [ class "typ var", style (var_style ++ c base0D) ] [ text (snake opts var) ]
-    TApply t1 t2 ->
-        span [ class "typ apply" ]
-            [ view_typ ( opts, FTypApplyFun here ) t1
-            , lparen opts
-            , view_typ ( opts, FTypApplyArg here ) t2
-            , rparen opts
-            ]
+        span (cursor_msgs ctx ++ [ style (cursor_style ctx ++ var_style ++ c base0D) ]) [ text (snake ctx.opts var) ]
     TArrow t1 t2 ->
-        span [ class "typ arrow" ]
-            [ view_typ ( opts, FTypArrowArg here ) t1
+        span (cursor_msgs ctx ++ [ style (cursor_style ctx) ])
+            [ view_typ (zoom FTypArrowArg ctx) t1
             , keyword "→"
-            , view_typ ( opts, FTypArrowResult here ) t2
+            , view_typ (zoom FTypArrowResult ctx) t2
             ]
+    TRecord record -> span (cursor_msgs ctx ++ [ style (cursor_style ctx) ]) [ text (toString record)]
 
 
 view_qname : Context -> QualifiedName -> Html Msg
-view_qname ( opts, here ) (qs, name) =
-    let color = case here of
-        FTypName _ -> base0B
+view_qname ctx (qs, name) =
+    let color = case ctx.here of
+        FTypName :: _ -> base0B
         _ -> base07
     in case qs of
         Nothing ->
-            span [ class "unqualifiedname", style (var_style ++ c base0D) ] [ text (snake opts name) ]
+            span (cursor_msgs ctx ++ [ style (cursor_style ctx ++ var_style ++ c base0D) ])
+                [ text (snake ctx.opts name) ]
         Just qualifier ->
-            span [ class "qualifiedname", style (c base03) ]
-                [   if opts.qualifiers && qualifier /= "Basics"
+            span (cursor_msgs ctx ++ [ style (cursor_style ctx ++ c base03) ] )
+                [   if ctx.opts.qualifiers && qualifier /= "Basics"
                     then span [ class "qualifier" ] [ text (qualifier ++ ".") ]
                     else span [] []
-                , span [ class "unqualifiedname", style (c color) ] [ text (snake opts name) ]
+                , span [ class "unqualifiedname", style (c color) ] [ text (snake ctx.opts name) ]
                 ]
 
 snake : Options -> String -> String
@@ -140,8 +191,10 @@ snake opts str =
     then str
     else str
         |> String.toList
-        |> List.indexedMap (\i c ->
-            if i /= 0 && Char.isUpper c then ['-', Char.toLower c] else [c] )
+        |> List.indexedMap (\index char ->
+            if  Char.isUpper char && index > 0
+            then [ '-', Char.toLower char ]
+            else [ char ] )
         |> List.concat
         |> String.fromList
 
@@ -169,37 +222,36 @@ lit_style =
 
 
 view_exp : Context -> Exp -> Html Msg
-view_exp ( opts, here ) exp =
+view_exp ctx exp =
     let
         it = case exp of
             Let bindings exp ->
-                span [ class "exp let", style (with_border1 opts) ]
+                span (cursor_msgs ctx ++ [ style (cursor_style ctx ++ with_border1 ctx.opts) ])
                     [ keyword "let"
-                    , span [] (bindings |> indexedMap (\n b ->
-                        view_binding ( opts, FLetBinding n here ) b) )
+                    , view_bindings (zoom FLetBindings ctx) bindings
                     , keyword "in"
-                    , view_exp ( opts, FLetExp here ) exp
+                    , view_exp (zoom FLetExp ctx) exp
                     ]
             Lam name exp ->
-                span [ class "exp lam", style (border_style ++ c base0E ++ with_border1 opts) ]
+                span (cursor_msgs ctx ++ [ style (cursor_style ctx ++ border_style ++ c base0E ++ with_border1 ctx.opts) ])
                     [ keyword "λ"
                     , span [ class "name", style var_style ] [ text name ]
                     , keyword "→"
                     --, Html.br [] []
-                    , view_exp ( opts, FLamExp here ) exp
+                    , view_exp (zoom FLamExp ctx) exp
                     ]
             Apply f x ->
-                view_apply ( opts, here ) f x
+                view_apply ctx f x
             Var qname ->
-                span [ class "exp var", style (with_border1 opts) ]
-                    [ view_qname ( opts, FVar here ) (ligature qname) ]
+                span (cursor_msgs ctx ++ [ style (cursor_style ctx ++ with_border1 ctx.opts) ])
+                    [ view_qname (zoom FVar ctx) (ligature qname) ]
             Case exp cases ->
-                view_patmat ( opts, here ) exp cases
+                view_patmat ctx exp cases
             Lit lit ->
-                span [ class "exp lit", style (lit_style ++ with_border1 opts) ]
-                    [ view_literal (FLit here) lit ]
-            Record _ ->
-                text "record"
+                span (cursor_msgs ctx ++ [ style (cursor_style ctx ++ lit_style ++ with_border1 ctx.opts) ])
+                    [ view_literal (zoom FLit ctx) lit ]
+            Record r ->
+                text (toString r)
     in it
 
 
@@ -227,33 +279,33 @@ is_infix fn =
     (String.uncons fn |> Maybe.map (Tuple.first >> (λc -> isUpper c || isLower c))) ? True
 
 view_apply : Context -> Exp -> Exp -> Html Msg
-view_apply (opts, here) f x =
+view_apply ctx f x =
     let render f x =
-            span [ class "exp apply" , style (with_border1 opts) ] <|
-                [ lparen opts
-                , view_exp ( opts, FApplyFun here ) f
+            span [ class "exp apply" , style (with_border1 ctx.opts) ] <|
+                [ lparen ctx.opts
+                , view_exp (zoom FApplyFun ctx) f
                 , span [ style (c base03)] [ text "‹" ]
-                , span (if opts.parens then [] else maybe_box x)
-                    [ view_exp ( opts, FApplyArg here ) x ]
-                , rparen opts
+                , span (if ctx.opts.parens then [] else maybe_box x)
+                    [ view_exp (zoom FApplyArg ctx) x ]
+                , rparen ctx.opts
                 ]
-    in case ( opts.infix, f ) of
+    in case ( ctx.opts.infix, f ) of
         ( True, Apply (Var (qs, fn)) y ) ->
             if is_infix fn
             then render f x
-            else span [ class "exp apply op", style (with_border1 opts) ]
-                [ lparen opts
-                , span (if opts.parens then [] else maybe_box y)
-                    [ view_exp ( opts, FApplyFun (FApplyFun here) ) y ]
+            else span [ class "exp apply op", style (with_border1 ctx.opts) ]
+                [ lparen ctx.opts
+                , span (if ctx.opts.parens then [] else maybe_box y)
+                    [ view_exp (zoom FApplyFun (zoom FApplyFun ctx) ) y ]
                 --, text " "
                 , span [ style (c base03) ] [ text "›" ]
                 , span [ style (bc base03 ++ ["border-width" => "1px"])]
-                    [ view_exp ( opts, FApplyFun (FApplyArg here) ) (Var ( qs, fn )) ]
+                    [ view_exp (zoom FApplyFun (zoom FApplyArg ctx)) (Var ( qs, fn )) ]
                 , span [ style (c base03) ] [ text "‹" ]
                 --, text " "
-                , span (if opts.parens then [] else maybe_box x)
-                    [ view_exp ( opts, FApplyArg here ) x ]
-                , rparen opts
+                , span (if ctx.opts.parens then [] else maybe_box x)
+                    [ view_exp (zoom FApplyArg ctx) x ]
+                , rparen ctx.opts
                 ]
         _ -> render f x
 
@@ -278,7 +330,7 @@ pat_arrow_style =
 
 td_style : List ( String, String )
 td_style =
-    bg base00 ++ c base0A ++
+    c base0A ++
     [ "vertical-align" => "top"
     , "padding" => "1px"
     , "font-family" => "Sans"
@@ -291,49 +343,63 @@ td_style =
     ]
 
 view_patmat : Context -> Exp -> List ( Pattern, Exp ) -> Html Msg
-view_patmat ( opts, here ) exp cases =
+view_patmat ctx exp cases =
     let view_case n (pat, exp) =
         tr []
-            [ td [ style (with_border1 opts ++ td_style ++ [ "position" => "relative", "border-right-width" => "1px" ]) ]
-                [ view_pattern (FCasePattern n here) pat
+            [ td [ style ((cursor_style (zoom (FCasePattern n) ctx)) ++ with_border1 ctx.opts ++ td_style ++ [ "position" => "relative", "border-right-width" => "1px" ]) ]
+                [ view_pattern (zoom (FCasePattern n) ctx) pat
                 , span [ class "arrow", style pat_arrow_style ] [ text " → " ]
                 ]
-            , td [ style (with_border1 opts ++ td_style ++ [ "padding-left" => "6px", "border-top-width" => "1px" ]) ]
-                [ view_exp ( opts, FCaseResult n here ) exp ]
+            , td [ style (with_border1 ctx.opts ++ td_style ++ [ "padding-left" => "6px", "border-top-width" => "1px" ]) ]
+                [ view_exp (zoom (FCaseResult n) ctx) exp ]
             ]
-    in table [ class "exp case if" ] <|
+    in table (cursor_msgs ctx ++ [ ]) <|
         [ tr []
             [ td
-                [ style (with_border1 opts ++ td_style ++
+                [ style (with_border1 ctx.opts ++ td_style ++
                     [ "vertical-align" => "middle"
                     , "border-bottom-style" => "solid"
                     ,"border-bottom-width" => "1px"
                     ])
                 ]
                 [ keyword "case" ]
-            , td [ style (with_border1 opts ++ td_style) ]
-                [ view_exp ( opts, FCaseExp here ) exp ]
+            , td [ style (with_border1 ctx.opts ++ td_style) ]
+                [ view_exp (zoom FCaseExp ctx) exp ]
             ]
         ] ++ (cases |> indexedMap view_case )
 
 
-view_literal : Focus -> Literal -> Html Msg
-view_literal here lit =
-    case lit of
-        String lit -> text ("\"" ++ lit ++ "\"")
-        Char lit -> text ("'" ++ toString lit ++ "'")
-        Int lit -> text (toString lit)
-        Float lit -> text (toString lit)
+view_literal : Context -> Literal -> Html Msg
+view_literal ctx lit =
+    span (cursor_msgs ctx ++ [ style (cursor_style ctx) ]) <|
+        case lit of
+            String lit -> [ text ("\"" ++ lit ++ "\"") ]
+            Char lit -> [ text ("'" ++ toString lit ++ "'") ]
+            Int lit -> [ text (toString lit) ]
+            Float lit -> [ text (toString lit) ]
 
 
-view_pattern : Focus -> Pattern -> Html Msg
-view_pattern here pattern =
-    span [ class "pattern", style (fg base07 ++ bg base02 ++ [ "margin-right" => "8px"]) ] [ text <|
-        case pattern of
-            PApply ps -> join "\n" (ps |> map toString)
-            PCon (q, n) -> n
-            PVar n -> n
-            PLit lit -> toString lit ]
+view_pattern : Context -> Pattern -> Html Msg
+view_pattern ctx pattern =
+    span (cursor_msgs ctx ++ [ style (cursor_style ctx ++ fg base07 ++ bg base02 ++ [ "margin-right" => "8px"]) ])
+        [ case pattern of
+            PCons qname patterns ->
+                span [ style (with_border1 ctx.opts) ] <|
+                    [ view_qname ctx qname ]
+                    ++ (patterns |> map (view_pattern ctx))
+            PRecord fields ->
+                span [] <|
+                    [ keyword "{" ]
+                    ++ (fields
+                        |> List.map (\field ->
+                            span [] [ text field, text "," ])
+                        )
+                    ++ [ keyword "}"]
+            PVar n ->
+                text n
+            PLit lit ->
+                view_literal ctx lit
+        ]
 
 keyword : String -> Html a
 keyword str =

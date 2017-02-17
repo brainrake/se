@@ -36,17 +36,9 @@ fizzbuzz n =
 
 init : Model
 init =
-    { src = fbstr
+    { init_model
+    | src = fbstr
     , ast = translate (Ast.parse fbstr)
-    , focus = ()
-    , opts =
-        { source = False
-        , borders = False
-        , parens = False
-        , qualifiers = False
-        , infix = True
-        , snake = True
-        }
     }
 
 
@@ -69,6 +61,9 @@ update msg model = case msg of
         { model | src = src, ast = translate (Ast.parse src)}
     OptionsMsg optsmsg ->
         { model | opts = update_opts optsmsg model.opts }
+    ChangeCursor cursor ->
+        { model | cursor = cursor }
+
 
 --main : Program Never Model Msg
 main = beginnerProgram { model = init, update = update, view = view }

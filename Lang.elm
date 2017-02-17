@@ -1,43 +1,67 @@
 module Lang exposing (..)
 
-import Dict exposing (Dict)
+import DictList exposing (DictList)
+
+
+type alias TypName = String
+
+type alias ModuleName = String
+
+type alias FieldName = String
+
+type alias ConsName = String
 
 
 type alias Module =
-    { name : String
-    , imports : List String
-    , bindings : List Binding
+    { name : ModuleName
+    , imports : List ModuleName
+    , types : DictList TypName TypDef
+    , aliases : DictList TypName Typ
+    , bindings : Bindings
+    }
+
+init_module : Module
+init_module =
+    { name = "Unnamed"
+    , imports = []
+    , types = DictList.empty
+    , aliases = DictList.empty
+    , bindings = DictList.empty
     }
 
 
-type alias Binding =
-    ( String, Maybe Typ, Exp )
+type alias TypDef =
+    List ( ConsName, List Typ )
 
 
 type Typ
-    = TName QualifiedName
-    | TVar String
-    | TApply Typ Typ
+    = TCons QualifiedName (List Typ)
     | TArrow Typ Typ
+    | TRecord (DictList String Typ)
+    | TVar String
 
 
 type alias QualifiedName =
     ( Maybe String, String )
 
 
+type alias Bindings =
+    DictList FieldName ( Maybe Typ, Exp )
+
 type Exp
-    = Let (List Binding) Exp
-    | Lam String Exp
-    | Apply Exp Exp
+    = Apply Exp Exp
+    | Let Bindings Exp
+    | Lam FieldName Exp
     | Var QualifiedName
     | Lit Literal
     | Case Exp (List ( Pattern, Exp ))
-    | Record (Dict String Exp)
+    | Record Bindings
+    --| Field FieldName
 
 
 type Pattern
-    = PApply (List Pattern)
-    | PCon QualifiedName
+    = PCons QualifiedName (List Pattern)
+    | PRecord (List String)
     | PVar String
     | PLit Literal
 
@@ -50,25 +74,25 @@ type Literal
 
 
 type Focus
-    = FTypApplyFun Focus
-    | FTypApplyArg Focus
-    | FTypArrowArg Focus
-    | FTypArrowResult Focus
-    | FTypName Focus
-    | FLetBinding Int Focus
-    | FLetExp Focus
-    | FBindingName Focus
-    | FBindingTyp Focus
-    | FBindingValue Focus
-    | FLamArg Focus
-    | FLamExp Focus
-    | FApplyFun Focus
-    | FApplyArg Focus
-    | FVar Focus
-    | FLit Focus
-    | FCaseExp Focus
-    | FCasePattern Int Focus
-    | FCaseResult Int Focus
-    | FRecordKey String Focus
-    | FRecordValue String Focus
+    = FTypApplyFun
+    | FTypApplyArg
+    | FTypArrowArg
+    | FTypArrowResult
+    | FTypName
+    | FLetBindings
+    | FLetExp
+    | FBindingName
+    | FBindingTyp
+    | FBindingValue
+    | FLamArg
+    | FLamExp
+    | FApplyFun
+    | FApplyArg
+    | FVar
+    | FLit
+    | FCaseExp
+    | FCasePattern Int
+    | FCaseResult Int
+    | FRecordKey String
+    | FRecordValue String
     | FPoint

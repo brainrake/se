@@ -9,6 +9,8 @@ import Combine exposing (..)
 import Lang exposing (..)
 import Maybe.Extra exposing ((?))
 import Char exposing (isUpper, isLower)
+import DictList exposing (DictList)
+
 
 translate: Result (Combine.ParseErr ()) (Combine.ParseOk () (List Ast.Statement.Statement)) -> Module
 translate res = case res of
@@ -16,34 +18,37 @@ translate res = case res of
   Err (state, stream, errs) ->
     { name = "Error"
     , imports = []
-    , bindings = [ ( "Error", Nothing, to_str (state, stream, errs) ) ]
+    , types = DictList.empty
+    , aliases = DictList.empty
+    , bindings = DictList.singleton "Error" ( Nothing, to_str (state, stream, errs) )
     }
 
 
 translate_module : List Ast.Statement.Statement -> Module
 translate_module ss =
-  let translate ss = case ss of
-    (FunctionTypeDeclaration name_ ast_typ) :: (FunctionDeclaration name names ast_exp) :: ss ->
-      let lam = λns -> case ns of
-            n :: ns -> Lam n (lam ns)
-            [] -> translate_exp ast_exp
-      in (name, Just (translate_typ ast_typ), lam names) :: translate ss
-    (FunctionDeclaration name names exp) :: ss ->
-      (name, Nothing, to_str exp) :: translate ss
-    (Comment str) :: ss -> []
-    _ :: ss -> translate ss
-    [] -> []
-  in { name = "Main", imports = [], bindings = translate ss }
+    let translate ss = case ss of
+        (FunctionTypeDeclaration name_ ast_typ) :: (FunctionDeclaration name names ast_exp) :: ss ->
+            let lam = λns -> case ns of
+                n :: ns -> Lam n (lam ns)
+                [] -> translate_exp ast_exp
+            in ( name, ( Just (translate_typ ast_typ), lam names ) ) :: translate ss
+        (FunctionDeclaration name names exp) :: ss ->
+            ( name, ( Nothing, to_str exp ) ) :: translate ss
+        (Comment str) :: ss -> []
+        _ :: ss -> translate ss
+        [] -> []
+    in  { name = "Main"
+        , imports = []
+        , types = DictList.empty
+        , aliases = DictList.empty
+        , bindings = DictList.fromList (translate ss)
+        }
 
 translate_typ : Ast.Statement.Type -> Typ
 translate_typ ast_typ =
     case ast_typ of
-        TypeConstructor q_ast_typ [] ->
-            TName (Just (head q_ast_typ ? "Basics"), last q_ast_typ ? "")
-        TypeConstructor q_ast_typ (x :: xs) ->
-            TApply -- TODO: handle longer list
-                (TName (head q_ast_typ, last q_ast_typ ? ""))
-                (translate_typ x)
+        TypeConstructor q_ast_typ args ->
+            TCons ( init q_ast_typ |> Maybe.map String.concat, last q_ast_typ ? "") (args |> List.map translate_typ)
         TypeVariable name ->
             TVar name
         TypeRecordConstructor typ pairs ->
@@ -80,8 +85,8 @@ translate_exp ast_exp =
             to_str ("RecordUpdate", name, pairs)
         Ast.Expression.If cond then_ else_ ->
             Lang.Case (translate_exp cond)
-                [ (PCon ( Just "Basics", "True" ), translate_exp then_)
-                , (PCon ( Just "Basics", "False" ), translate_exp else_)
+                [ (PCons ( Just "Basics", "True" ) [], translate_exp then_)
+                , (PCons ( Just "Basics", "False" ) [], translate_exp else_)
                 ]
         Ast.Expression.Let bindings exp  ->
             to_str ("Let", bindings, exp)
