@@ -52,7 +52,7 @@ cursor_style ctx =
     case ctx.cursor of
         FPoint :: [] -> ["opacity" => "1", "background-color" => "#696", "border-color" => "#afa"]
         _ :: _ -> ["opacity" => "1", "border-color" => "#696", "border-width" => "1px"]
-        _ -> [] --["opacity" => "0.7"]
+        [] -> [] --["opacity" => "0.7"]
 
 view_source : String -> Html Msg
 view_source src =
@@ -208,6 +208,8 @@ ligature : ( Maybe String, String ) -> ( Maybe String, String )
 ligature ( qs, name ) =
     if name == "|>"
     then ( qs, "▷" )
+    else if name == "<|"
+    then ( qs, "◁" )
     else ( qs, name )
 
 
