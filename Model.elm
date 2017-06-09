@@ -1,5 +1,6 @@
 module Model exposing (..)
 
+import Keyboard.Extra
 import Lang exposing (..)
 
 
@@ -8,6 +9,8 @@ type Msg
     | OptionsMsg OptionsMsg
     | ChangeSrc String
     | ChangeCursor (List Focus)
+    | ChangeCaret (List Focus)
+    | KeyPress Keyboard.Extra.Key
 
 
 type OptionsMsg
@@ -17,6 +20,7 @@ type OptionsMsg
     | Qualifiers Bool
     | Infix Bool
     | Snake Bool
+    | Direction Bool
 
 
 type alias Model =
@@ -24,7 +28,10 @@ type alias Model =
     , src : String
     , opts : Options
     , cursor : List Focus
+    , caret : List Focus
+    , keys_pressed : List Keyboard.Extra.Key
     }
+
 
 init_model : Model
 init_model =
@@ -32,6 +39,8 @@ init_model =
     , src = ""
     , opts = init_opts
     , cursor = []
+    , caret = []
+    , keys_pressed = []
     }
 
 
@@ -42,7 +51,9 @@ type alias Options =
     , qualifiers : Bool
     , infix : Bool
     , snake : Bool
+    , direction : Bool
     }
+
 
 init_opts : Options
 init_opts =
@@ -50,6 +61,7 @@ init_opts =
     , borders = False
     , parens = False
     , qualifiers = False
-    , infix = True
+    , infix = False
     , snake = True
+    , direction = False
     }

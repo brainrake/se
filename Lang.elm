@@ -3,13 +3,20 @@ module Lang exposing (..)
 import DictList exposing (DictList)
 
 
-type alias TypName = String
+type alias TypName =
+    String
 
-type alias ModuleName = String
 
-type alias FieldName = String
+type alias ModuleName =
+    String
 
-type alias ConsName = String
+
+type alias FieldName =
+    String
+
+
+type alias ConsName =
+    String
 
 
 type alias Module =
@@ -19,6 +26,7 @@ type alias Module =
     , aliases : DictList TypName Typ
     , bindings : Bindings
     }
+
 
 init_module : Module
 init_module =
@@ -48,6 +56,7 @@ type alias QualifiedName =
 type alias Bindings =
     DictList FieldName ( Maybe Typ, Exp )
 
+
 type Exp
     = Apply Exp Exp
     | Let Bindings Exp
@@ -56,7 +65,10 @@ type Exp
     | Lit Literal
     | Case Exp (List ( Pattern, Exp ))
     | Record Bindings
-    --| Field FieldName
+
+
+
+--| Field FieldName
 
 
 type Pattern
@@ -81,15 +93,13 @@ type Focus
     | FTypName
     | FLetBindings
     | FLetExp
-    | FBindingName
-    | FBindingTyp
-    | FBindingValue
+    | FBindingName Int
+    | FBindingTyp Int
+    | FBindingValue Int
     | FLamArg
     | FLamExp
     | FApplyFun
     | FApplyArg
-    | FVar
-    | FLit
     | FCaseExp
     | FCasePattern Int
     | FCaseResult Int
