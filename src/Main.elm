@@ -2,7 +2,7 @@ module Main exposing (..)
 
 --import TimeTravel.Html exposing (beginnerProgram)
 
-import Html exposing (program)
+import Html exposing (programWithFlags)
 import Keyboard.Extra exposing (Key(..))
 import View exposing (view)
 import Model exposing (..)
@@ -19,6 +19,32 @@ main : Html.Html msg
 main = Html.ul [] (List.range 1 100 |> List.map (\\n ->
   Html.li [] [ Html.text (Main.fizzBuzz n) ]))
 
+
+fizzBuzz : Int -> String
+fizzBuzz n =
+    case (n % 3, n % 5) of
+        (0, 0) -> "fizzbuzz"
+        (0, _) -> "fizz"
+        (_, 0) -> "buzz"
+        _ -> Basics.toString n
+"""
+
+
+c : String
+c =
+    """
+    case (n % 3, n % 5) of
+        (0, 0) -> "fizzbuzz"
+        (0, _) -> "fizz"
+        (_, 0) -> "buzz"
+        _ ->  Basics.toString n)
+
+"""
+
+
+b : String
+b =
+    """
 fizzBuzz : Int -> String
 fizzBuzz n = (
     if n % 3 == 0 && n % 5 == 0 then "fizzbuzz"
@@ -29,6 +55,7 @@ fizzBuzz n = (
 """
 
 
+a : String
 a =
     """
 fizzbuzz : Int -> String
@@ -276,13 +303,19 @@ ascend_up at =
         Just focus ->
             case focus of
                 FCasePattern n ->
-                    update_last (FCasePattern (n - 1)) at []
+                    if n > 0 then
+                        update_last (FCasePattern (n - 1)) at []
+                    else
+                        update_last FCaseExp at []
 
                 FCaseResult n ->
-                    update_last (FCaseResult (n - 1)) at []
+                    if n > 0 then
+                        update_last (FCaseResult (n - 1)) at []
+                    else
+                        ascend_up (remove_last at [])
 
                 _ ->
-                    at
+                    ascend_up (remove_last at [])
 
         _ ->
             at
@@ -369,10 +402,10 @@ update msg model =
             key_press key { model | keys_pressed = key :: model.keys_pressed }
 
 
-main : Program Never Model Msg
+main : Program { swapCount : Int } Model Msg
 main =
-    program
-        { init = ( init, Cmd.none )
+    programWithFlags
+        { init = \{ swapCount } -> ( init, Cmd.none )
         , update = \msg model -> ( update msg model, Cmd.none )
         , view = view
         , subscriptions = \_ -> Keyboard.Extra.downs KeyPress

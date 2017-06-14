@@ -143,7 +143,8 @@ translate_exp ast_exp =
             to_str ( "Let", bindings, exp )
 
         Ast.Expression.Case exp cases ->
-            to_str ( "Case", exp, cases )
+            Lang.Case (translate_exp exp)
+                (List.map (\( p, exp ) -> ( translate_pattern p, translate_exp exp )) cases)
 
         Lambda exps exp ->
             -- TODO - other args
@@ -164,10 +165,35 @@ translate_exp ast_exp =
             Apply (Apply (translate_exp op) (translate_exp exp1)) (translate_exp exp2)
 
         Tuple t ->
-            to_str ( "Tuple", t, "" )
+            Tup (t |> List.map (\exp -> translate_exp exp))
 
         AccessFunction af ->
             to_str ( "AccessFunction", "", af )
+
+
+translate_pattern : Ast.Expression.Expression -> Lang.Pattern
+translate_pattern exp =
+    case exp of
+        Tuple t ->
+            PTup (t |> List.map (\exp -> translate_pattern exp))
+
+        Variable names ->
+            PVar
+                ( if List.length names > 1 then
+                    head names
+                  else
+                    Nothing
+                , last names ? ""
+                )
+
+        Character char ->
+            PLit (Char char)
+
+        Integer int ->
+            PLit (Lang.Int int)
+
+        _ ->
+            PCons ( Just "Basics", toString exp ) []
 
 
 translate_access : Ast.Expression.Expression -> List String -> Exp

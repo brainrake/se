@@ -357,6 +357,20 @@ view_exp ctx exp =
                     span (cursor_msgs ctx ++ [ style (cursor_style ctx ++ lit_style ++ with_border1 ctx.opts) ])
                         [ view_literal ctx lit ]
 
+                Tup t ->
+                    span []
+                        ([ keyword "(" ]
+                            ++ (t
+                                    |> List.indexedMap
+                                        (\n exp ->
+                                            view_exp (zoom (FTup n) ctx) exp
+                                        )
+                                    |> List.intersperse
+                                        (keyword ",")
+                               )
+                            ++ [ keyword ")" ]
+                        )
+
                 Record r ->
                     text (toString r)
     in
@@ -582,10 +596,24 @@ view_pattern ctx pattern =
                         ++ [ keyword "}" ]
 
             PVar n ->
-                text n
+                view_qname ctx (ligature n)
 
             PLit lit ->
                 view_literal ctx lit
+
+            PTup t ->
+                span []
+                    ([ keyword "(" ]
+                        ++ (t
+                                |> List.indexedMap
+                                    (\n p ->
+                                        view_pattern (zoom (FTup n) ctx) p
+                                    )
+                                |> List.intersperse
+                                    (keyword ",")
+                           )
+                        ++ [ keyword ")" ]
+                    )
         ]
 
 

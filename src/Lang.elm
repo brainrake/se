@@ -63,6 +63,7 @@ type Exp
     | Lam FieldName Exp
     | Var QualifiedName
     | Lit Literal
+    | Tup (List Exp)
     | Case Exp (List ( Pattern, Exp ))
     | Record Bindings
 
@@ -74,8 +75,9 @@ type Exp
 type Pattern
     = PCons QualifiedName (List Pattern)
     | PRecord (List String)
-    | PVar String
+    | PVar QualifiedName
     | PLit Literal
+    | PTup (List Pattern)
 
 
 type Literal
@@ -105,4 +107,5 @@ type Focus
     | FCaseResult Int
     | FRecordKey String
     | FRecordValue String
+    | FTup Int
     | FPoint
