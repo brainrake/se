@@ -9,6 +9,7 @@ import Model exposing (..)
 import Translate exposing (translate)
 import Lang exposing (..)
 import DictList exposing (..)
+import List.Extra exposing ((!!))
 import Ast
 
 
@@ -195,6 +196,9 @@ walk_exp exp_ at_ =
         ( Case exp cases, FCaseExp :: at ) ->
             walk_exp exp at
 
+        ( Tup exps, (FTup n) :: at ) ->
+            exps !! n |> Maybe.andThen (\exp -> walk_exp exp at)
+
         ( exp, FPoint :: at ) ->
             Just exp
 
@@ -214,6 +218,17 @@ descend_right exp_ acc =
         Lam var exp ->
             descend_right exp (FLamExp :: acc)
 
+        Tup exps ->
+            case List.reverse exps of
+                exp :: _ ->
+                    descend_left exp (FTup (List.length exps - 1) :: acc)
+
+                [] ->
+                    List.reverse acc
+
+        Case exp cases ->
+            descend_right exp (FCaseExp :: acc)
+
         _ ->
             List.reverse acc
 
@@ -226,6 +241,17 @@ descend_left exp_ acc =
 
         Lam var exp ->
             List.reverse (FLamArg :: acc)
+
+        Tup exps ->
+            case exps of
+                exp :: _ ->
+                    descend_left exp (FTup 0 :: acc)
+
+                [] ->
+                    List.reverse acc
+
+        Case exp cases ->
+            descend_left exp (FCaseExp :: acc)
 
         _ ->
             List.reverse acc
@@ -251,11 +277,20 @@ ascend_left at =
                 FApplyArg ->
                     update_last FApplyFun at []
 
+                FCasePattern n ->
+                    ascend_left (remove_last at [])
+
                 FCaseResult n ->
                     update_last (FCasePattern n) at []
 
                 FRecordValue key ->
                     update_last (FRecordKey key) at []
+
+                FTup n ->
+                    if n > 0 then
+                        update_last (FTup (n - 1)) at []
+                    else
+                        ascend_left (remove_last at [])
 
                 _ ->
                     at
@@ -289,6 +324,9 @@ ascend_right at =
 
                 FRecordKey key ->
                     update_last (FRecordValue key) at []
+
+                FTup n ->
+                    update_last (FTup (n + 1)) at []
 
                 _ ->
                     at
@@ -326,8 +364,17 @@ ascend_down at =
     case get_last at of
         Just focus ->
             case focus of
+                FCaseExp ->
+                    update_last (FCasePattern 0) at []
+
+                FCasePattern n ->
+                    update_last (FCasePattern (n + 1)) at []
+
+                FCaseResult n ->
+                    update_last (FCaseResult (n + 1)) at []
+
                 _ ->
-                    at
+                    ascend_down (remove_last at [])
 
         _ ->
             at
@@ -336,23 +383,23 @@ ascend_down at =
 key_press : Keyboard.Extra.Key -> Model -> Model
 key_press key model =
     let
-        moved_caret =
-            Debug.log "moved_caret" <|
+        moved_cursor =
+            Debug.log "moved_cursor" <|
                 case key of
                     ArrowLeft ->
-                        ascend_left model.caret
+                        ascend_left model.cursor
 
                     ArrowRight ->
-                        ascend_right model.caret
+                        ascend_right model.cursor
 
                     ArrowUp ->
-                        ascend_up model.caret
+                        ascend_up model.cursor
 
                     ArrowDown ->
-                        ascend_down model.caret
+                        ascend_down model.cursor
 
                     _ ->
-                        model.caret
+                        model.cursor
 
         descend =
             case key of
@@ -362,22 +409,28 @@ key_press key model =
                 ArrowRight ->
                     descend_left
 
+                ArrowUp ->
+                    descend_left
+
+                ArrowDown ->
+                    descend_left
+
                 _ ->
                     \_ _ -> []
 
         m_exp =
-            Debug.log "m_exp" <| walk_bindings model.ast.bindings moved_caret
+            Debug.log "m_exp" <| walk_bindings model.ast.bindings moved_cursor
 
-        caret =
-            Debug.log "caret" <|
+        cursor =
+            Debug.log "cursor" <|
                 case m_exp of
                     Just exp ->
-                        (remove_point moved_caret []) ++ (descend exp []) ++ [ FPoint ]
+                        (remove_point moved_cursor []) ++ (descend exp []) ++ [ FPoint ]
 
                     Nothing ->
-                        moved_caret
+                        moved_cursor
     in
-        { model | caret = caret }
+        { model | cursor = cursor }
 
 
 update : Msg -> Model -> Model
@@ -392,11 +445,11 @@ update msg model =
         OptionsMsg optsmsg ->
             { model | opts = update_opts optsmsg model.opts }
 
+        ChangePointer pointer ->
+            { model | pointer = pointer }
+
         ChangeCursor cursor ->
             { model | cursor = cursor }
-
-        ChangeCaret caret ->
-            { model | caret = caret }
 
         KeyPress key ->
             key_press key { model | keys_pressed = key :: model.keys_pressed }

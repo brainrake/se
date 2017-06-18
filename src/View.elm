@@ -21,7 +21,7 @@ type alias Context =
     { opts : Options
     , here : List Focus
     , cursor : List Focus
-    , caret : List Focus
+    , pointer : List Focus
     }
 
 
@@ -30,7 +30,7 @@ init_ctx =
     { opts = init_opts
     , here = []
     , cursor = []
-    , caret = []
+    , pointer = []
     }
 
 
@@ -38,6 +38,16 @@ zoom : Focus -> Context -> Context
 zoom focus ctx =
     { ctx
         | here = focus :: ctx.here
+        , pointer =
+            case ctx.pointer of
+                [] ->
+                    []
+
+                x :: xs ->
+                    if x == focus then
+                        xs
+                    else
+                        []
         , cursor =
             case ctx.cursor of
                 [] ->
@@ -48,32 +58,22 @@ zoom focus ctx =
                         xs
                     else
                         []
-        , caret =
-            case ctx.caret of
-                [] ->
-                    []
-
-                x :: xs ->
-                    if x == focus then
-                        xs
-                    else
-                        []
     }
 
 
-cursor_msgs : Context -> List (Html.Attribute Msg)
-cursor_msgs ctx =
-    [ Html.Events.onMouseEnter (ChangeCursor (List.reverse (FPoint :: ctx.here)))
-    , Html.Events.onMouseLeave (ChangeCursor (List.reverse (FPoint :: (List.tail ctx.here ? []))))
-    , Html.Events.onWithOptions "click" (Html.Events.Options True True) (Json.Decode.succeed (ChangeCaret (List.reverse (FPoint :: ctx.here))))
+pointer_msgs : Context -> List (Html.Attribute Msg)
+pointer_msgs ctx =
+    [ Html.Events.onMouseEnter (ChangePointer (List.reverse (FPoint :: ctx.here)))
+    , Html.Events.onMouseLeave (ChangePointer (List.reverse (FPoint :: (List.tail ctx.here ? []))))
+    , Html.Events.onWithOptions "click" (Html.Events.Options True True) (Json.Decode.succeed (ChangeCursor (List.reverse (FPoint :: ctx.here))))
     ]
 
 
-cursor_style : Context -> List ( String, String )
-cursor_style ctx =
+pointer_style : Context -> List ( String, String )
+pointer_style ctx =
     let
         style1 =
-            case ctx.cursor of
+            case ctx.pointer of
                 FPoint :: [] ->
                     [ "opacity" => "1", "background-color" => "#696", "border-color" => "#afa" ]
 
@@ -83,7 +83,7 @@ cursor_style ctx =
                     []
 
         style2 =
-            case ctx.caret of
+            case ctx.cursor of
                 FPoint :: [] ->
                     [ "opacity" => "1", "background-color" => "#66a", "border-color" => "#aaf" ]
 
@@ -114,7 +114,7 @@ view : Model -> Html Msg
 view model =
     div []
         [ Html.node "style" [] [ text css_ ]
-        , Html.node "script" [] [ text """window.addEventListener("keydown", (e) => e.preventDefault())""" ]
+        , Html.node "script" [] [ text """window.addEventListener("keydown", (e) => { if (e.key.indexOf("Arrow") != -1 ) { e.preventDefault() }})""" ]
           --, div [] [ text (toString model.ast) ]
         , div []
             (if model.opts.source then
@@ -123,17 +123,17 @@ view model =
                 []
             )
         , div [] [ view_config model.opts |> Html.map OptionsMsg ]
-        , div [ Html.Events.onMouseLeave (ChangeCursor []) ]
+        , div [ Html.Events.onMouseLeave (ChangePointer []) ]
             [ view_module
                 { init_ctx
                     | opts = model.opts
+                    , pointer = model.pointer
                     , cursor = model.cursor
-                    , caret = model.caret
                 }
                 model.ast
             ]
+        , div [] [ text (toString model.pointer) ]
         , div [] [ text (toString model.cursor) ]
-        , div [] [ text (toString model.caret) ]
           --, div [] [ text (toString model.keys_pressed) ]
           --, div [ class "module" ] [ view_module model.module_ ]
         ]
@@ -176,11 +176,11 @@ view_bindings ctx bindings =
                 [ span [ class "name", style (c base0E) ] [ text (snake ctx.opts name) ]
                 , keyword ":"
                 , view_typ (zoom (FBindingTyp n) ctx) typ
-                , keyword ""
-                , span [ style (c base02) ] [ text "with " ]
-                , span [ style (c base03) ] [ text "Basics, " ]
-                , span [ style (c base03) ] [ text "List, " ]
-                , span [ style (c base03) ] [ text "Html " ]
+                  --, keyword ""
+                  --, span [ style (c base02) ] [ text "with " ]
+                  --, span [ style (c base03) ] [ text "Basics, " ]
+                  --, span [ style (c base03) ] [ text "List, " ]
+                  --, span [ style (c base03) ] [ text "Html " ]
                 , keyword "="
                 ]
             , div [] [ view_exp (zoom (FBindingValue n) ctx) exp ]
@@ -192,7 +192,7 @@ view_bindings ctx bindings =
             , view_exp (zoom (FBindingValue n) ctx) exp
             ]
     in
-        div [ style (cursor_style ctx) ] <|
+        div [ style (pointer_style ctx) ] <|
             (bindings
                 |> DictList.indexedMap
                     (\n name ( mtyp, exp ) ->
@@ -213,11 +213,11 @@ view_typ : Context -> Typ -> Html Msg
 view_typ ctx typ =
     case typ of
         TCons qname [] ->
-            span (cursor_msgs ctx ++ [ style (c base0B ++ cursor_style ctx) ])
+            span (pointer_msgs ctx ++ [ style (c base0B ++ pointer_style ctx) ])
                 [ view_qname (zoom FTypName ctx) qname ]
 
         TCons qname args ->
-            span (cursor_msgs ctx)
+            span (pointer_msgs ctx)
                 [ lparen ctx.opts
                 , view_qname (zoom FTypName ctx) qname
                 , span [] <| (args |> map (view_typ (zoom FTypApplyArg ctx)))
@@ -225,17 +225,17 @@ view_typ ctx typ =
                 ]
 
         TVar var ->
-            span (cursor_msgs ctx ++ [ style (cursor_style ctx ++ var_style ++ c base0D) ]) [ text (snake ctx.opts var) ]
+            span (pointer_msgs ctx ++ [ style (pointer_style ctx ++ var_style ++ c base0D) ]) [ text (snake ctx.opts var) ]
 
         TArrow t1 t2 ->
-            span (cursor_msgs ctx ++ [ style (cursor_style ctx) ])
+            span (pointer_msgs ctx ++ [ style (pointer_style ctx) ])
                 [ view_typ (zoom FTypArrowArg ctx) t1
                 , keyword "→"
                 , view_typ (zoom FTypArrowResult ctx) t2
                 ]
 
         TRecord record ->
-            span (cursor_msgs ctx ++ [ style (cursor_style ctx) ]) [ text (toString record) ]
+            span (pointer_msgs ctx ++ [ style (pointer_style ctx) ]) [ text (toString record) ]
 
 
 view_qname : Context -> QualifiedName -> Html Msg
@@ -251,11 +251,11 @@ view_qname ctx ( qs, name ) =
     in
         case qs of
             Nothing ->
-                span (cursor_msgs ctx ++ [ style (cursor_style ctx ++ var_style ++ c base0D) ])
+                span (pointer_msgs ctx ++ [ style (pointer_style ctx ++ var_style ++ c base0D) ])
                     [ text (snake ctx.opts name) ]
 
             Just qualifier ->
-                span (cursor_msgs ctx ++ [ style (cursor_style ctx ++ c base03) ])
+                span (pointer_msgs ctx ++ [ style (pointer_style ctx ++ c base03) ])
                     [ if ctx.opts.qualifiers && qualifier /= "Basics" then
                         span [ class "qualifier" ] [ text (qualifier ++ ".") ]
                       else
@@ -319,7 +319,7 @@ view_exp ctx exp =
         it =
             case exp of
                 Let bindings exp ->
-                    span (cursor_msgs ctx ++ [ style (cursor_style ctx ++ with_border1 ctx.opts) ])
+                    span (pointer_msgs ctx ++ [ style (pointer_style ctx ++ with_border1 ctx.opts) ])
                         [ keyword "let"
                         , view_bindings (zoom FLetBindings ctx) bindings
                         , keyword "in"
@@ -327,13 +327,13 @@ view_exp ctx exp =
                         ]
 
                 Lam name exp ->
-                    span (cursor_msgs ctx ++ [ style (border_style ++ c base0E ++ with_border1 ctx.opts) ])
+                    span (pointer_msgs ctx ++ [ style (border_style ++ c base0E ++ with_border1 ctx.opts) ])
                         [ lparen ctx.opts
                         , if ctx.opts.parens then
                             keyword "λ"
                           else
                             text ""
-                        , span [ class "name", style (var_style ++ cursor_style (zoom FLamArg ctx)) ] [ text name ]
+                        , span [ class "name", style (var_style ++ pointer_style (zoom FLamArg ctx)) ] [ text name ]
                         , if ctx.opts.parens then
                             keyword ""
                           else
@@ -347,14 +347,14 @@ view_exp ctx exp =
                     view_apply ctx f x
 
                 Var qname ->
-                    span (cursor_msgs ctx ++ [ style (cursor_style ctx ++ with_border1 ctx.opts) ])
+                    span (pointer_msgs ctx ++ [ style (pointer_style ctx ++ with_border1 ctx.opts) ])
                         [ view_qname ctx (ligature qname) ]
 
                 Case exp cases ->
                     view_patmat ctx exp cases
 
                 Lit lit ->
-                    span (cursor_msgs ctx ++ [ style (cursor_style ctx ++ lit_style ++ with_border1 ctx.opts) ])
+                    span (pointer_msgs ctx ++ [ style (pointer_style ctx ++ lit_style ++ with_border1 ctx.opts) ])
                         [ view_literal ctx lit ]
 
                 Tup t ->
@@ -421,7 +421,7 @@ view_apply : Context -> Exp -> Exp -> Html Msg
 view_apply ctx f x =
     let
         render f x =
-            span [ class "exp apply", style (with_border1 ctx.opts ++ cursor_style ctx) ] <|
+            span [ class "exp apply", style (with_border1 ctx.opts ++ pointer_style ctx) ] <|
                 [ lparen ctx.opts
                 , view_exp (zoom FApplyFun ctx) f
                 , span [ style (c base03) ]
@@ -530,7 +530,7 @@ view_patmat ctx exp cases =
     let
         view_case n ( pat, exp ) =
             tr []
-                [ td [ style ((cursor_style (zoom (FCasePattern n) ctx)) ++ with_border1 ctx.opts ++ td_style ++ [ "position" => "relative", "border-right-width" => "1px" ]) ]
+                [ td [ style ((pointer_style (zoom (FCasePattern n) ctx)) ++ with_border1 ctx.opts ++ td_style ++ [ "position" => "relative", "border-right-width" => "1px" ]) ]
                     [ view_pattern (zoom (FCasePattern n) ctx) pat
                     , span [ class "arrow", style pat_arrow_style ] [ text " → " ]
                     ]
@@ -538,7 +538,7 @@ view_patmat ctx exp cases =
                     [ view_exp (zoom (FCaseResult n) ctx) exp ]
                 ]
     in
-        table (cursor_msgs ctx ++ []) <|
+        table (pointer_msgs ctx ++ []) <|
             [ tr []
                 [ td
                     [ style
@@ -560,7 +560,7 @@ view_patmat ctx exp cases =
 
 view_literal : Context -> Literal -> Html Msg
 view_literal ctx lit =
-    span (cursor_msgs ctx ++ [ style (cursor_style ctx) ]) <|
+    span (pointer_msgs ctx ++ [ style (pointer_style ctx) ]) <|
         case lit of
             String lit ->
                 [ text ("\"" ++ lit ++ "\"") ]
@@ -577,7 +577,7 @@ view_literal ctx lit =
 
 view_pattern : Context -> Pattern -> Html Msg
 view_pattern ctx pattern =
-    span (cursor_msgs ctx ++ [ style (cursor_style ctx ++ fg base08 ++ bg base02 ++ [ "margin-right" => "8px" ]) ])
+    span (pointer_msgs ctx ++ [ style (pointer_style ctx ++ fg base08 ++ bg base02 ++ [ "margin-right" => "8px" ]) ])
         [ case pattern of
             PCons qname patterns ->
                 span [ style (with_border1 ctx.opts) ] <|

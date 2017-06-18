@@ -8,8 +8,8 @@ type Msg
     = Nop
     | OptionsMsg OptionsMsg
     | ChangeSrc String
+    | ChangePointer (List Focus)
     | ChangeCursor (List Focus)
-    | ChangeCaret (List Focus)
     | KeyPress Keyboard.Extra.Key
 
 
@@ -27,8 +27,8 @@ type alias Model =
     { ast : Module
     , src : String
     , opts : Options
+    , pointer : List Focus
     , cursor : List Focus
-    , caret : List Focus
     , keys_pressed : List Keyboard.Extra.Key
     }
 
@@ -38,8 +38,8 @@ init_model =
     { ast = init_module
     , src = ""
     , opts = init_opts
+    , pointer = []
     , cursor = []
-    , caret = []
     , keys_pressed = []
     }
 
