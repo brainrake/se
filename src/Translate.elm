@@ -2,7 +2,10 @@ module Translate exposing (..)
 
 import List exposing (head)
 import List.Extra exposing (last, init)
-import Ast
+
+
+--import Ast
+
 import Ast.Expression exposing (..)
 import Ast.Statement exposing (..)
 import Combine exposing (..)
@@ -135,8 +138,8 @@ translate_exp ast_exp =
 
         Ast.Expression.If cond then_ else_ ->
             Lang.Case (translate_exp cond)
-                [ ( PCons ( Just "Basics", "True" ) [], translate_exp then_ )
-                , ( PCons ( Just "Basics", "False" ) [], translate_exp else_ )
+                [ ( Var ( Just "Basics", "True" ), translate_exp then_ )
+                , ( Var ( Just "Basics", "False" ), translate_exp else_ )
                 ]
 
         Ast.Expression.Let bindings exp ->
@@ -144,7 +147,7 @@ translate_exp ast_exp =
 
         Ast.Expression.Case exp cases ->
             Lang.Case (translate_exp exp)
-                (List.map (\( p, exp ) -> ( translate_pattern p, translate_exp exp )) cases)
+                (List.map (\( p, exp ) -> ( translate_exp p, translate_exp exp )) cases)
 
         Lambda exps exp ->
             -- TODO - other args
@@ -169,31 +172,6 @@ translate_exp ast_exp =
 
         AccessFunction af ->
             to_str ( "AccessFunction", "", af )
-
-
-translate_pattern : Ast.Expression.Expression -> Lang.Pattern
-translate_pattern exp =
-    case exp of
-        Tuple t ->
-            PTup (t |> List.map (\exp -> translate_pattern exp))
-
-        Variable names ->
-            PVar
-                ( if List.length names > 1 then
-                    head names
-                  else
-                    Nothing
-                , last names ? ""
-                )
-
-        Character char ->
-            PLit (Char char)
-
-        Integer int ->
-            PLit (Lang.Int int)
-
-        _ ->
-            PCons ( Just "Basics", toString exp ) []
 
 
 translate_access : Ast.Expression.Expression -> List String -> Exp

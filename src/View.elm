@@ -15,6 +15,7 @@ import DictList exposing (DictList)
 import SeColor exposing (..)
 import SeRender exposing (..)
 import Json.Decode
+import Json.Encode exposing (encode)
 
 
 type alias Context =
@@ -22,6 +23,7 @@ type alias Context =
     , here : List Focus
     , cursor : List Focus
     , pointer : List Focus
+    , is_pattern : Bool
     }
 
 
@@ -31,6 +33,7 @@ init_ctx =
     , here = []
     , cursor = []
     , pointer = []
+    , is_pattern = False
     }
 
 
@@ -134,6 +137,8 @@ view model =
             ]
         , div [] [ text (toString model.pointer) ]
         , div [] [ text (toString model.cursor) ]
+        , div [] [ text (toString model.ast) ]
+        , div [] [ text (encode 4 (encode_bindings model.ast.bindings)) ]
           --, div [] [ text (toString model.keys_pressed) ]
           --, div [ class "module" ] [ view_module model.module_ ]
         ]
@@ -173,7 +178,7 @@ view_bindings ctx bindings =
     let
         view_binding_with_typ typ n name exp =
             [ div []
-                [ span [ class "name", style (c base0E) ] [ text (snake ctx.opts name) ]
+                [ span [ class "name", style (c base0E ++ pointer_style (zoom (FBindingName n) ctx)) ] [ text (snake ctx.opts name) ]
                 , keyword ":"
                 , view_typ (zoom (FBindingTyp n) ctx) typ
                   --, keyword ""
@@ -316,32 +321,42 @@ lit_style =
 view_exp : Context -> Exp -> Html Msg
 view_exp ctx exp =
     let
+        pattern_error =
+            span [] [ keyword "PATTERN ERROR" ]
+
         it =
             case exp of
                 Let bindings exp ->
-                    span (pointer_msgs ctx ++ [ style (pointer_style ctx ++ with_border1 ctx.opts) ])
-                        [ keyword "let"
-                        , view_bindings (zoom FLetBindings ctx) bindings
-                        , keyword "in"
-                        , view_exp (zoom FLetExp ctx) exp
-                        ]
+                    if ctx.is_pattern then
+                        pattern_error
+                    else
+                        span (pointer_msgs ctx ++ [ style (pointer_style ctx ++ with_border1 ctx.opts) ])
+                            [ keyword "let"
+                            , view_bindings (zoom FLetBindings ctx) bindings
+                            , keyword "in"
+                            , view_exp (zoom FLetExp ctx) exp
+                            ]
 
                 Lam name exp ->
-                    span (pointer_msgs ctx ++ [ style (border_style ++ c base0E ++ with_border1 ctx.opts) ])
-                        [ lparen ctx.opts
-                        , if ctx.opts.parens then
-                            keyword "λ"
-                          else
-                            text ""
-                        , span [ class "name", style (var_style ++ pointer_style (zoom FLamArg ctx)) ] [ text name ]
-                        , if ctx.opts.parens then
-                            keyword ""
-                          else
-                            keyword "→"
-                          --, Html.br [] []
-                        , view_exp (zoom FLamExp ctx) exp
-                        , rparen ctx.opts
-                        ]
+                    if ctx.is_pattern then
+                        pattern_error
+                    else
+                        span [ style (border_style ++ c base0E ++ with_border1 ctx.opts) ]
+                            [ lparen ctx.opts
+                            , if True then
+                                -- ctx.opts.parens then
+                                keyword "λ"
+                              else
+                                text ""
+                            , span (pointer_msgs (zoom FLamArg ctx) ++ [ class "name", style (var_style ++ pointer_style (zoom FLamArg ctx)) ]) [ text name ]
+                            , if ctx.opts.parens then
+                                keyword ""
+                              else
+                                keyword "→"
+                              --, Html.br [] []
+                            , view_exp (zoom FLamExp ctx) exp
+                            , rparen ctx.opts
+                            ]
 
                 Apply f x ->
                     view_apply ctx f x
@@ -351,7 +366,10 @@ view_exp ctx exp =
                         [ view_qname ctx (ligature qname) ]
 
                 Case exp cases ->
-                    view_patmat ctx exp cases
+                    if ctx.is_pattern then
+                        pattern_error
+                    else
+                        view_patmat ctx exp cases
 
                 Lit lit ->
                     span (pointer_msgs ctx ++ [ style (pointer_style ctx ++ lit_style ++ with_border1 ctx.opts) ])
@@ -525,13 +543,13 @@ td_style =
            ]
 
 
-view_patmat : Context -> Exp -> List ( Pattern, Exp ) -> Html Msg
+view_patmat : Context -> Exp -> List ( Exp, Exp ) -> Html Msg
 view_patmat ctx exp cases =
     let
         view_case n ( pat, exp ) =
             tr []
                 [ td [ style ((pointer_style (zoom (FCasePattern n) ctx)) ++ with_border1 ctx.opts ++ td_style ++ [ "position" => "relative", "border-right-width" => "1px" ]) ]
-                    [ view_pattern (zoom (FCasePattern n) ctx) pat
+                    [ view_exp (zoom (FCasePattern n) { ctx | is_pattern = True }) pat
                     , span [ class "arrow", style pat_arrow_style ] [ text " → " ]
                     ]
                 , td [ style (with_border1 ctx.opts ++ td_style ++ [ "padding-left" => "6px", "border-top-width" => "1px" ]) ]
@@ -573,48 +591,6 @@ view_literal ctx lit =
 
             Float lit ->
                 [ text (toString lit) ]
-
-
-view_pattern : Context -> Pattern -> Html Msg
-view_pattern ctx pattern =
-    span (pointer_msgs ctx ++ [ style (pointer_style ctx ++ fg base08 ++ bg base02 ++ [ "margin-right" => "8px" ]) ])
-        [ case pattern of
-            PCons qname patterns ->
-                span [ style (with_border1 ctx.opts) ] <|
-                    [ view_qname ctx qname ]
-                        ++ (patterns |> map (view_pattern ctx))
-
-            PRecord fields ->
-                span [] <|
-                    [ keyword "{" ]
-                        ++ (fields
-                                |> List.map
-                                    (\field ->
-                                        span [] [ text field, text "," ]
-                                    )
-                           )
-                        ++ [ keyword "}" ]
-
-            PVar n ->
-                view_qname ctx (ligature n)
-
-            PLit lit ->
-                view_literal ctx lit
-
-            PTup t ->
-                span []
-                    ([ keyword "(" ]
-                        ++ (t
-                                |> List.indexedMap
-                                    (\n p ->
-                                        view_pattern (zoom (FTup n) ctx) p
-                                    )
-                                |> List.intersperse
-                                    (keyword ",")
-                           )
-                        ++ [ keyword ")" ]
-                    )
-        ]
 
 
 keyword : String -> Html a
