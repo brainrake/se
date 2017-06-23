@@ -7,6 +7,10 @@ var elm = Elm.Main.fullscreen({
   swapCount: 0
 });
 
+elm.ports.code.subscribe(function(message) {
+
+})
+
 //interop
 // elm.ports.alert.subscribe(function(message) {
 //   alert(message);

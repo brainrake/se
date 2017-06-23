@@ -2,6 +2,8 @@ module Lang exposing (..)
 
 import Json.Encode exposing (..)
 import DictList exposing (DictList)
+import Char exposing (isUpper, isLower)
+import Maybe.Extra exposing ((?))
 
 
 type alias TypName =
@@ -104,9 +106,14 @@ type Focus
     | FPoint
 
 
+is_infix : String -> Bool
+is_infix fn =
+    not ((String.uncons fn |> Maybe.map (Tuple.first >> (\c -> isUpper c || isLower c))) ? True)
+
+
 encode_exp : Exp -> Json.Encode.Value
-encode_exp exp =
-    case exp of
+encode_exp exp_ =
+    case exp_ of
         Apply fun arg ->
             object [ ( "Apply", list [ encode_exp fun, encode_exp arg ] ) ]
 
@@ -151,3 +158,83 @@ encode_literal lit =
 encode_bindings : Bindings -> Json.Encode.Value
 encode_bindings bs =
     list (DictList.toList bs |> List.map (\( k, ( t, v ) ) -> list [ string k, encode_exp v ]))
+
+
+indent : Int -> String
+indent level =
+    List.repeat level "    " |> String.join ""
+
+
+str_exp : Int -> Exp -> String
+str_exp level exp_ =
+    case exp_ of
+        Apply (Apply (Var ( ns, f )) arg1) arg2 ->
+            if is_infix f then
+                "(" ++ str_exp level arg1 ++ " " ++ str_exp level (Var ( ns, f )) ++ " " ++ str_exp level arg2 ++ ")"
+            else
+                "((" ++ str_exp level (Var ( ns, f )) ++ " " ++ str_exp level arg1 ++ ") " ++ str_exp level arg2 ++ ")"
+
+        Apply fun arg ->
+            "(" ++ str_exp level fun ++ " " ++ str_exp level arg ++ ")"
+
+        Let bindings exp ->
+            indent level ++ "let" ++ (bindings |> str_bindings (level + 1)) ++ "\n" ++ indent level ++ "in\n" ++ str_exp (level + 1) exp
+
+        Lam arg exp ->
+            "(\\" ++ arg ++ " ->\n" ++ indent (level + 1) ++ str_exp (level + 1) exp ++ ")"
+
+        Var name ->
+            Tuple.second name
+
+        Lit lit ->
+            str_literal lit
+
+        Tup exps ->
+            "( " ++ (exps |> List.map (str_exp level) |> String.join ", ") ++ " )"
+
+        Case exp cases ->
+            "case "
+                ++ str_exp level exp
+                ++ " of\n"
+                ++ (cases
+                        |> List.map
+                            (\( p, res ) ->
+                                indent (level + 1)
+                                    ++ str_exp (level + 1) p
+                                    ++ " -> \n"
+                                    ++ indent (level + 2)
+                                    ++ str_exp (level + 2) res
+                            )
+                        |> String.join "\n"
+                   )
+
+        Record bindings ->
+            "record"
+
+
+str_literal : Literal -> String
+str_literal lit =
+    case lit of
+        String x ->
+            "\"" ++ x ++ "\""
+
+        Char x ->
+            "'" ++ toString x ++ "'"
+
+        Int x ->
+            toString x
+
+        Float x ->
+            toString x
+
+
+str_bindings : Int -> Bindings -> String
+str_bindings level bs =
+    bs
+        |> DictList.toList
+        |> List.map
+            (\( name, ( m_typ, exp ) ) ->
+                indent level ++ name ++ " = \n" ++ indent (level + 1) ++ str_exp (level + 1) exp
+            )
+        |> String.join "\n"
+        |> (++) "\n"

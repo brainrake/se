@@ -1,4 +1,4 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 --import TimeTravel.Html exposing (beginnerProgram)
 
@@ -75,6 +75,7 @@ init =
         | src = fbstr
         , ast = translate (Ast.parse fbstr)
     }
+
 
 
 update_opts : OptionsMsg -> Options -> Options
@@ -319,8 +320,7 @@ ascend_left bs at =
 ascend_right : Bindings -> List Focus -> List Focus
 ascend_right bs at =
     case get_last at of
-        Just focus ->
-            case focus of
+        Just focus -> case focus of
                 FLetBindings ->
                     update_last FLetExp at []
 
@@ -580,33 +580,40 @@ key_press key model =
         }
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Nop ->
-            model
+            ( model, Cmd.none )
 
         ChangeSrc src ->
-            { model | src = src, ast = translate (Ast.parse src) }
+            let
+                ast =
+                    translate (Ast.parse src)
+            in
+                ( { model | src = src, ast = ast }, code (str_bindings 0 ast.bindings) )
 
         OptionsMsg optsmsg ->
-            { model | opts = update_opts optsmsg model.opts }
+            ( { model | opts = update_opts optsmsg model.opts }, Cmd.none )
 
         ChangePointer pointer ->
-            { model | pointer = pointer }
+            ( { model | pointer = pointer }, Cmd.none )
 
         ChangeCursor cursor ->
-            { model | cursor = cursor }
+            ( { model | cursor = cursor }, Cmd.none )
 
         KeyPress key ->
-            key_press key { model | keys_pressed = key :: model.keys_pressed }
+            ( key_press key { model | keys_pressed = key :: model.keys_pressed }, Cmd.none )
+
+
+port code : String -> Cmd msg
 
 
 main : Program { swapCount : Int } Model Msg
 main =
     programWithFlags
         { init = \{ swapCount } -> ( init, Cmd.none )
-        , update = \msg model -> ( update msg model, Cmd.none )
+        , update = update
         , view = view
         , subscriptions = \_ -> Keyboard.Extra.downs KeyPress
         }

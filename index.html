@@ -15543,6 +15543,228 @@ var _ohanhi$keyboard_extra$Keyboard_Extra$targetKey = A2(
 	_elm_lang$core$Json_Decode$map,
 	_ohanhi$keyboard_extra$Keyboard_Extra$fromCode,
 	A2(_elm_lang$core$Json_Decode$field, 'keyCode', _elm_lang$core$Json_Decode$int));
+var _user$project$Lang$str_literal = function (lit) {
+	var _p0 = lit;
+	switch (_p0.ctor) {
+		case 'String':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				'\"',
+				A2(_elm_lang$core$Basics_ops['++'], _p0._0, '\"'));
+		case 'Char':
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				'\'',
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					_elm_lang$core$Basics$toString(_p0._0),
+					'\''));
+		case 'Int':
+			return _elm_lang$core$Basics$toString(_p0._0);
+		default:
+			return _elm_lang$core$Basics$toString(_p0._0);
+	}
+};
+var _user$project$Lang$indent = function (level) {
+	return A2(
+		_elm_lang$core$String$join,
+		'',
+		A2(_elm_lang$core$List$repeat, level, '    '));
+};
+var _user$project$Lang$encode_literal = function (lit) {
+	var _p1 = lit;
+	switch (_p1.ctor) {
+		case 'String':
+			return _elm_lang$core$Json_Encode$string(_p1._0);
+		case 'Char':
+			return _elm_lang$core$Json_Encode$string(
+				_elm_lang$core$Basics$toString(_p1._0));
+		case 'Int':
+			return _elm_lang$core$Json_Encode$int(_p1._0);
+		default:
+			return _elm_lang$core$Json_Encode$float(_p1._0);
+	}
+};
+var _user$project$Lang$encode_exp = function (exp_) {
+	var _p2 = exp_;
+	switch (_p2.ctor) {
+		case 'Apply':
+			return _elm_lang$core$Json_Encode$object(
+				{
+					ctor: '::',
+					_0: {
+						ctor: '_Tuple2',
+						_0: 'Apply',
+						_1: _elm_lang$core$Json_Encode$list(
+							{
+								ctor: '::',
+								_0: _user$project$Lang$encode_exp(_p2._0),
+								_1: {
+									ctor: '::',
+									_0: _user$project$Lang$encode_exp(_p2._1),
+									_1: {ctor: '[]'}
+								}
+							})
+					},
+					_1: {ctor: '[]'}
+				});
+		case 'Let':
+			return _elm_lang$core$Json_Encode$object(
+				{
+					ctor: '::',
+					_0: {
+						ctor: '_Tuple2',
+						_0: 'Let',
+						_1: _elm_lang$core$Json_Encode$list(
+							{
+								ctor: '::',
+								_0: _user$project$Lang$encode_bindings(_p2._0),
+								_1: {
+									ctor: '::',
+									_0: _user$project$Lang$encode_exp(_p2._1),
+									_1: {ctor: '[]'}
+								}
+							})
+					},
+					_1: {ctor: '[]'}
+				});
+		case 'Lam':
+			return _elm_lang$core$Json_Encode$object(
+				{
+					ctor: '::',
+					_0: {
+						ctor: '_Tuple2',
+						_0: 'Lam',
+						_1: _elm_lang$core$Json_Encode$list(
+							{
+								ctor: '::',
+								_0: _elm_lang$core$Json_Encode$string(_p2._0),
+								_1: {
+									ctor: '::',
+									_0: _user$project$Lang$encode_exp(_p2._1),
+									_1: {ctor: '[]'}
+								}
+							})
+					},
+					_1: {ctor: '[]'}
+				});
+		case 'Var':
+			return _elm_lang$core$Json_Encode$object(
+				{
+					ctor: '::',
+					_0: {
+						ctor: '_Tuple2',
+						_0: 'Var',
+						_1: _elm_lang$core$Json_Encode$string(
+							_elm_lang$core$Basics$toString(_p2._0))
+					},
+					_1: {ctor: '[]'}
+				});
+		case 'Lit':
+			return _elm_lang$core$Json_Encode$object(
+				{
+					ctor: '::',
+					_0: {
+						ctor: '_Tuple2',
+						_0: 'Lit',
+						_1: _user$project$Lang$encode_literal(_p2._0)
+					},
+					_1: {ctor: '[]'}
+				});
+		case 'Tup':
+			return _elm_lang$core$Json_Encode$object(
+				{
+					ctor: '::',
+					_0: {
+						ctor: '_Tuple2',
+						_0: 'Tup',
+						_1: _elm_lang$core$Json_Encode$list(
+							A2(_elm_lang$core$List$map, _user$project$Lang$encode_exp, _p2._0))
+					},
+					_1: {ctor: '[]'}
+				});
+		case 'Case':
+			return _elm_lang$core$Json_Encode$object(
+				{
+					ctor: '::',
+					_0: {
+						ctor: '_Tuple2',
+						_0: 'Case',
+						_1: _elm_lang$core$Json_Encode$list(
+							{
+								ctor: '::',
+								_0: _user$project$Lang$encode_exp(_p2._0),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$core$Json_Encode$list(
+										A2(
+											_elm_lang$core$List$map,
+											function (_p3) {
+												var _p4 = _p3;
+												return _elm_lang$core$Json_Encode$list(
+													{
+														ctor: '::',
+														_0: _user$project$Lang$encode_exp(_p4._0),
+														_1: {
+															ctor: '::',
+															_0: _user$project$Lang$encode_exp(_p4._1),
+															_1: {ctor: '[]'}
+														}
+													});
+											},
+											_p2._1)),
+									_1: {ctor: '[]'}
+								}
+							})
+					},
+					_1: {ctor: '[]'}
+				});
+		default:
+			return _elm_lang$core$Json_Encode$object(
+				{
+					ctor: '::',
+					_0: {
+						ctor: '_Tuple2',
+						_0: 'Record',
+						_1: _user$project$Lang$encode_bindings(_p2._0)
+					},
+					_1: {ctor: '[]'}
+				});
+	}
+};
+var _user$project$Lang$encode_bindings = function (bs) {
+	return _elm_lang$core$Json_Encode$list(
+		A2(
+			_elm_lang$core$List$map,
+			function (_p5) {
+				var _p6 = _p5;
+				return _elm_lang$core$Json_Encode$list(
+					{
+						ctor: '::',
+						_0: _elm_lang$core$Json_Encode$string(_p6._0),
+						_1: {
+							ctor: '::',
+							_0: _user$project$Lang$encode_exp(_p6._1._1),
+							_1: {ctor: '[]'}
+						}
+					});
+			},
+			_Gizra$elm_dictlist$DictList$toList(bs)));
+};
+var _user$project$Lang$is_infix = function (fn) {
+	return !A2(
+		_elm_community$maybe_extra$Maybe_Extra_ops['?'],
+		A2(
+			_elm_lang$core$Maybe$map,
+			function (_p7) {
+				return function (c) {
+					return _elm_lang$core$Char$isUpper(c) || _elm_lang$core$Char$isLower(c);
+				}(
+					_elm_lang$core$Tuple$first(_p7));
+			},
+			_elm_lang$core$String$uncons(fn)),
+		true);
+};
 var _user$project$Lang$init_module = {
 	name: 'Unnamed',
 	imports: {ctor: '[]'},
@@ -15584,6 +15806,198 @@ var _user$project$Lang$Lit = function (a) {
 var _user$project$Lang$Var = function (a) {
 	return {ctor: 'Var', _0: a};
 };
+var _user$project$Lang$str_exp = F2(
+	function (level, exp_) {
+		var _p8 = exp_;
+		switch (_p8.ctor) {
+			case 'Apply':
+				if (((_p8._0.ctor === 'Apply') && (_p8._0._0.ctor === 'Var')) && (_p8._0._0._0.ctor === '_Tuple2')) {
+					var _p12 = _p8._0._0._0._0;
+					var _p11 = _p8._0._0._0._1;
+					var _p10 = _p8._1;
+					var _p9 = _p8._0._1;
+					return _user$project$Lang$is_infix(_p11) ? A2(
+						_elm_lang$core$Basics_ops['++'],
+						'(',
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							A2(_user$project$Lang$str_exp, level, _p9),
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								' ',
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									A2(
+										_user$project$Lang$str_exp,
+										level,
+										_user$project$Lang$Var(
+											{ctor: '_Tuple2', _0: _p12, _1: _p11})),
+									A2(
+										_elm_lang$core$Basics_ops['++'],
+										' ',
+										A2(
+											_elm_lang$core$Basics_ops['++'],
+											A2(_user$project$Lang$str_exp, level, _p10),
+											')')))))) : A2(
+						_elm_lang$core$Basics_ops['++'],
+						'((',
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							A2(
+								_user$project$Lang$str_exp,
+								level,
+								_user$project$Lang$Var(
+									{ctor: '_Tuple2', _0: _p12, _1: _p11})),
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								' ',
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									A2(_user$project$Lang$str_exp, level, _p9),
+									A2(
+										_elm_lang$core$Basics_ops['++'],
+										') ',
+										A2(
+											_elm_lang$core$Basics_ops['++'],
+											A2(_user$project$Lang$str_exp, level, _p10),
+											')'))))));
+				} else {
+					return A2(
+						_elm_lang$core$Basics_ops['++'],
+						'(',
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							A2(_user$project$Lang$str_exp, level, _p8._0),
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								' ',
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									A2(_user$project$Lang$str_exp, level, _p8._1),
+									')'))));
+				}
+			case 'Let':
+				return A2(
+					_elm_lang$core$Basics_ops['++'],
+					_user$project$Lang$indent(level),
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						'let',
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							A2(_user$project$Lang$str_bindings, level + 1, _p8._0),
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								'\n',
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									_user$project$Lang$indent(level),
+									A2(
+										_elm_lang$core$Basics_ops['++'],
+										'in\n',
+										A2(_user$project$Lang$str_exp, level + 1, _p8._1)))))));
+			case 'Lam':
+				return A2(
+					_elm_lang$core$Basics_ops['++'],
+					'(\\',
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						_p8._0,
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							' ->\n',
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								_user$project$Lang$indent(level + 1),
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									A2(_user$project$Lang$str_exp, level + 1, _p8._1),
+									')')))));
+			case 'Var':
+				return _elm_lang$core$Tuple$second(_p8._0);
+			case 'Lit':
+				return _user$project$Lang$str_literal(_p8._0);
+			case 'Tup':
+				return A2(
+					_elm_lang$core$Basics_ops['++'],
+					'( ',
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						A2(
+							_elm_lang$core$String$join,
+							', ',
+							A2(
+								_elm_lang$core$List$map,
+								_user$project$Lang$str_exp(level),
+								_p8._0)),
+						' )'));
+			case 'Case':
+				return A2(
+					_elm_lang$core$Basics_ops['++'],
+					'case ',
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						A2(_user$project$Lang$str_exp, level, _p8._0),
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							' of\n',
+							A2(
+								_elm_lang$core$String$join,
+								'\n',
+								A2(
+									_elm_lang$core$List$map,
+									function (_p13) {
+										var _p14 = _p13;
+										return A2(
+											_elm_lang$core$Basics_ops['++'],
+											_user$project$Lang$indent(level + 1),
+											A2(
+												_elm_lang$core$Basics_ops['++'],
+												A2(_user$project$Lang$str_exp, level + 1, _p14._0),
+												A2(
+													_elm_lang$core$Basics_ops['++'],
+													' -> \n',
+													A2(
+														_elm_lang$core$Basics_ops['++'],
+														_user$project$Lang$indent(level + 2),
+														A2(_user$project$Lang$str_exp, level + 2, _p14._1)))));
+									},
+									_p8._1)))));
+			default:
+				return 'record';
+		}
+	});
+var _user$project$Lang$str_bindings = F2(
+	function (level, bs) {
+		return A2(
+			F2(
+				function (x, y) {
+					return A2(_elm_lang$core$Basics_ops['++'], x, y);
+				}),
+			'\n',
+			A2(
+				_elm_lang$core$String$join,
+				'\n',
+				A2(
+					_elm_lang$core$List$map,
+					function (_p15) {
+						var _p16 = _p15;
+						return A2(
+							_elm_lang$core$Basics_ops['++'],
+							_user$project$Lang$indent(level),
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								_p16._0,
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									' = \n',
+									A2(
+										_elm_lang$core$Basics_ops['++'],
+										_user$project$Lang$indent(level + 1),
+										A2(_user$project$Lang$str_exp, level + 1, _p16._1._1)))));
+					},
+					_Gizra$elm_dictlist$DictList$toList(bs))));
+	});
 var _user$project$Lang$Lam = F2(
 	function (a, b) {
 		return {ctor: 'Lam', _0: a, _1: b};
@@ -15595,22 +16009,6 @@ var _user$project$Lang$Let = F2(
 var _user$project$Lang$Apply = F2(
 	function (a, b) {
 		return {ctor: 'Apply', _0: a, _1: b};
-	});
-var _user$project$Lang$PTup = function (a) {
-	return {ctor: 'PTup', _0: a};
-};
-var _user$project$Lang$PLit = function (a) {
-	return {ctor: 'PLit', _0: a};
-};
-var _user$project$Lang$PVar = function (a) {
-	return {ctor: 'PVar', _0: a};
-};
-var _user$project$Lang$PRecord = function (a) {
-	return {ctor: 'PRecord', _0: a};
-};
-var _user$project$Lang$PCons = F2(
-	function (a, b) {
-		return {ctor: 'PCons', _0: a, _1: b};
 	});
 var _user$project$Lang$Float = function (a) {
 	return {ctor: 'Float', _0: a};
@@ -15666,13 +16064,13 @@ var _user$project$Model$init_model = {
 	ast: _user$project$Lang$init_module,
 	src: '',
 	opts: _user$project$Model$init_opts,
+	pointer: {ctor: '[]'},
 	cursor: {ctor: '[]'},
-	caret: {ctor: '[]'},
 	keys_pressed: {ctor: '[]'}
 };
 var _user$project$Model$Model = F6(
 	function (a, b, c, d, e, f) {
-		return {ast: a, src: b, opts: c, cursor: d, caret: e, keys_pressed: f};
+		return {ast: a, src: b, opts: c, pointer: d, cursor: e, keys_pressed: f};
 	});
 var _user$project$Model$Options = F7(
 	function (a, b, c, d, e, f, g) {
@@ -15681,11 +16079,11 @@ var _user$project$Model$Options = F7(
 var _user$project$Model$KeyPress = function (a) {
 	return {ctor: 'KeyPress', _0: a};
 };
-var _user$project$Model$ChangeCaret = function (a) {
-	return {ctor: 'ChangeCaret', _0: a};
-};
 var _user$project$Model$ChangeCursor = function (a) {
 	return {ctor: 'ChangeCursor', _0: a};
+};
+var _user$project$Model$ChangePointer = function (a) {
+	return {ctor: 'ChangePointer', _0: a};
 };
 var _user$project$Model$ChangeSrc = function (a) {
 	return {ctor: 'ChangeSrc', _0: a};
@@ -15783,13 +16181,9 @@ var _user$project$View$keyword = function (str) {
 		_elm_lang$html$Html$span,
 		{
 			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('keyword'),
-			_1: {
-				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$style(
-					_user$project$SeColor$c(_user$project$SeColor$base0A)),
-				_1: {ctor: '[]'}
-			}
+			_0: _elm_lang$html$Html_Attributes$style(
+				_user$project$SeColor$c(_user$project$SeColor$base0A)),
+			_1: {ctor: '[]'}
 		},
 		{
 			ctor: '::',
@@ -15883,20 +16277,6 @@ var _user$project$View$border_style = {
 		}
 	}
 };
-var _user$project$View$is_infix = function (fn) {
-	return A2(
-		_elm_community$maybe_extra$Maybe_Extra_ops['?'],
-		A2(
-			_elm_lang$core$Maybe$map,
-			function (_p2) {
-				return function (c) {
-					return _elm_lang$core$Char$isUpper(c) || _elm_lang$core$Char$isLower(c);
-				}(
-					_elm_lang$core$Tuple$first(_p2));
-			},
-			_elm_lang$core$String$uncons(fn)),
-		true);
-};
 var _user$project$View$paren = F2(
 	function (str, opts) {
 		return A2(
@@ -15917,8 +16297,8 @@ var _user$project$View$paren = F2(
 var _user$project$View$lparen = _user$project$View$paren('(');
 var _user$project$View$rparen = _user$project$View$paren(')');
 var _user$project$View$maybe_box = function (exp) {
-	var _p3 = exp;
-	switch (_p3.ctor) {
+	var _p2 = exp;
+	switch (_p2.ctor) {
 		case 'Var':
 			return {ctor: '[]'};
 		case 'Lit':
@@ -15967,11 +16347,11 @@ var _user$project$View$var_style = {
 		}
 	}
 };
-var _user$project$View$ligature = function (_p4) {
-	var _p5 = _p4;
-	var _p7 = _p5._0;
-	var _p6 = _p5._1;
-	return _elm_lang$core$Native_Utils.eq(_p6, '|>') ? {ctor: '_Tuple2', _0: _p7, _1: '▷'} : (_elm_lang$core$Native_Utils.eq(_p6, '<|') ? {ctor: '_Tuple2', _0: _p7, _1: '◁'} : {ctor: '_Tuple2', _0: _p7, _1: _p6});
+var _user$project$View$ligature = function (_p3) {
+	var _p4 = _p3;
+	var _p6 = _p4._0;
+	var _p5 = _p4._1;
+	return _elm_lang$core$Native_Utils.eq(_p5, '|>') ? {ctor: '_Tuple2', _0: _p6, _1: '▷'} : (_elm_lang$core$Native_Utils.eq(_p5, '<|') ? {ctor: '_Tuple2', _0: _p6, _1: '◁'} : {ctor: '_Tuple2', _0: _p6, _1: _p5});
 };
 var _user$project$View$with_border1 = function (opts) {
 	return {
@@ -16111,10 +16491,10 @@ var _user$project$View$view_source = function (src) {
 			_1: {ctor: '[]'}
 		});
 };
-var _user$project$View$cursor_style = function (ctx) {
+var _user$project$View$pointer_style = function (ctx) {
 	var style2 = function () {
-		var _p8 = ctx.caret;
-		if (((_p8.ctor === '::') && (_p8._0.ctor === 'FPoint')) && (_p8._1.ctor === '[]')) {
+		var _p7 = ctx.cursor;
+		if (((_p7.ctor === '::') && (_p7._0.ctor === 'FPoint')) && (_p7._1.ctor === '[]')) {
 			return {
 				ctor: '::',
 				_0: A2(_elm_community$basics_extra$Basics_Extra_ops['=>'], 'opacity', '1'),
@@ -16133,8 +16513,8 @@ var _user$project$View$cursor_style = function (ctx) {
 		}
 	}();
 	var style1 = function () {
-		var _p9 = ctx.cursor;
-		if (((_p9.ctor === '::') && (_p9._0.ctor === 'FPoint')) && (_p9._1.ctor === '[]')) {
+		var _p8 = ctx.pointer;
+		if (((_p8.ctor === '::') && (_p8._0.ctor === 'FPoint')) && (_p8._1.ctor === '[]')) {
 			return {
 				ctor: '::',
 				_0: A2(_elm_community$basics_extra$Basics_Extra_ops['=>'], 'opacity', '1'),
@@ -16154,17 +16534,17 @@ var _user$project$View$cursor_style = function (ctx) {
 	}();
 	return A2(_elm_lang$core$Basics_ops['++'], style1, style2);
 };
-var _user$project$View$cursor_msgs = function (ctx) {
+var _user$project$View$pointer_msgs = function (ctx) {
 	return {
 		ctor: '::',
 		_0: _elm_lang$html$Html_Events$onMouseEnter(
-			_user$project$Model$ChangeCursor(
+			_user$project$Model$ChangePointer(
 				_elm_lang$core$List$reverse(
 					{ctor: '::', _0: _user$project$Lang$FPoint, _1: ctx.here}))),
 		_1: {
 			ctor: '::',
 			_0: _elm_lang$html$Html_Events$onMouseLeave(
-				_user$project$Model$ChangeCursor(
+				_user$project$Model$ChangePointer(
 					_elm_lang$core$List$reverse(
 						{
 							ctor: '::',
@@ -16181,7 +16561,7 @@ var _user$project$View$cursor_msgs = function (ctx) {
 					'click',
 					A2(_elm_lang$html$Html_Events$Options, true, true),
 					_elm_lang$core$Json_Decode$succeed(
-						_user$project$Model$ChangeCaret(
+						_user$project$Model$ChangeCursor(
 							_elm_lang$core$List$reverse(
 								{ctor: '::', _0: _user$project$Lang$FPoint, _1: ctx.here})))),
 				_1: {ctor: '[]'}
@@ -16190,30 +16570,30 @@ var _user$project$View$cursor_msgs = function (ctx) {
 	};
 };
 var _user$project$View$view_qname = F2(
-	function (ctx, _p10) {
-		var _p11 = _p10;
-		var _p15 = _p11._1;
+	function (ctx, _p9) {
+		var _p10 = _p9;
+		var _p14 = _p10._1;
 		var color = function () {
-			var _p12 = ctx.here;
-			if ((_p12.ctor === '::') && (_p12._0.ctor === 'FTypName')) {
+			var _p11 = ctx.here;
+			if ((_p11.ctor === '::') && (_p11._0.ctor === 'FTypName')) {
 				return _user$project$SeColor$base0B;
 			} else {
 				return _user$project$SeColor$base07;
 			}
 		}();
-		var _p13 = _p11._0;
-		if (_p13.ctor === 'Nothing') {
+		var _p12 = _p10._0;
+		if (_p12.ctor === 'Nothing') {
 			return A2(
 				_elm_lang$html$Html$span,
 				A2(
 					_elm_lang$core$Basics_ops['++'],
-					_user$project$View$cursor_msgs(ctx),
+					_user$project$View$pointer_msgs(ctx),
 					{
 						ctor: '::',
 						_0: _elm_lang$html$Html_Attributes$style(
 							A2(
 								_elm_lang$core$Basics_ops['++'],
-								_user$project$View$cursor_style(ctx),
+								_user$project$View$pointer_style(ctx),
 								A2(
 									_elm_lang$core$Basics_ops['++'],
 									_user$project$View$var_style,
@@ -16223,38 +16603,34 @@ var _user$project$View$view_qname = F2(
 				{
 					ctor: '::',
 					_0: _elm_lang$html$Html$text(
-						A2(_user$project$View$snake, ctx.opts, _p15)),
+						A2(_user$project$View$snake, ctx.opts, _p14)),
 					_1: {ctor: '[]'}
 				});
 		} else {
-			var _p14 = _p13._0;
+			var _p13 = _p12._0;
 			return A2(
 				_elm_lang$html$Html$span,
 				A2(
 					_elm_lang$core$Basics_ops['++'],
-					_user$project$View$cursor_msgs(ctx),
+					_user$project$View$pointer_msgs(ctx),
 					{
 						ctor: '::',
 						_0: _elm_lang$html$Html_Attributes$style(
 							A2(
 								_elm_lang$core$Basics_ops['++'],
-								_user$project$View$cursor_style(ctx),
+								_user$project$View$pointer_style(ctx),
 								_user$project$SeColor$c(_user$project$SeColor$base03))),
 						_1: {ctor: '[]'}
 					}),
 				{
 					ctor: '::',
-					_0: (ctx.opts.qualifiers && (!_elm_lang$core$Native_Utils.eq(_p14, 'Basics'))) ? A2(
+					_0: (ctx.opts.qualifiers && (!_elm_lang$core$Native_Utils.eq(_p13, 'Basics'))) ? A2(
 						_elm_lang$html$Html$span,
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('qualifier'),
-							_1: {ctor: '[]'}
-						},
+						{ctor: '[]'},
 						{
 							ctor: '::',
 							_0: _elm_lang$html$Html$text(
-								A2(_elm_lang$core$Basics_ops['++'], _p14, '.')),
+								A2(_elm_lang$core$Basics_ops['++'], _p13, '.')),
 							_1: {ctor: '[]'}
 						}) : A2(
 						_elm_lang$html$Html$span,
@@ -16266,18 +16642,14 @@ var _user$project$View$view_qname = F2(
 							_elm_lang$html$Html$span,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$class('unqualifiedname'),
-								_1: {
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$style(
-										_user$project$SeColor$c(color)),
-									_1: {ctor: '[]'}
-								}
+								_0: _elm_lang$html$Html_Attributes$style(
+									_user$project$SeColor$c(color)),
+								_1: {ctor: '[]'}
 							},
 							{
 								ctor: '::',
 								_0: _elm_lang$html$Html$text(
-									A2(_user$project$View$snake, ctx.opts, _p15)),
+									A2(_user$project$View$snake, ctx.opts, _p14)),
 								_1: {ctor: '[]'}
 							}),
 						_1: {ctor: '[]'}
@@ -16291,16 +16663,16 @@ var _user$project$View$view_literal = F2(
 			_elm_lang$html$Html$span,
 			A2(
 				_elm_lang$core$Basics_ops['++'],
-				_user$project$View$cursor_msgs(ctx),
+				_user$project$View$pointer_msgs(ctx),
 				{
 					ctor: '::',
 					_0: _elm_lang$html$Html_Attributes$style(
-						_user$project$View$cursor_style(ctx)),
+						_user$project$View$pointer_style(ctx)),
 					_1: {ctor: '[]'}
 				}),
 			function () {
-				var _p16 = lit;
-				switch (_p16.ctor) {
+				var _p15 = lit;
+				switch (_p15.ctor) {
 					case 'String':
 						return {
 							ctor: '::',
@@ -16308,7 +16680,7 @@ var _user$project$View$view_literal = F2(
 								A2(
 									_elm_lang$core$Basics_ops['++'],
 									'\"',
-									A2(_elm_lang$core$Basics_ops['++'], _p16._0, '\"'))),
+									A2(_elm_lang$core$Basics_ops['++'], _p15._0, '\"'))),
 							_1: {ctor: '[]'}
 						};
 					case 'Char':
@@ -16320,7 +16692,7 @@ var _user$project$View$view_literal = F2(
 									'\'',
 									A2(
 										_elm_lang$core$Basics_ops['++'],
-										_elm_lang$core$Basics$toString(_p16._0),
+										_elm_lang$core$Basics$toString(_p15._0),
 										'\''))),
 							_1: {ctor: '[]'}
 						};
@@ -16328,14 +16700,14 @@ var _user$project$View$view_literal = F2(
 						return {
 							ctor: '::',
 							_0: _elm_lang$html$Html$text(
-								_elm_lang$core$Basics$toString(_p16._0)),
+								_elm_lang$core$Basics$toString(_p15._0)),
 							_1: {ctor: '[]'}
 						};
 					default:
 						return {
 							ctor: '::',
 							_0: _elm_lang$html$Html$text(
-								_elm_lang$core$Basics$toString(_p16._0)),
+								_elm_lang$core$Basics$toString(_p15._0)),
 							_1: {ctor: '[]'}
 						};
 				}
@@ -16347,6 +16719,14 @@ var _user$project$View$zoom = F2(
 			ctx,
 			{
 				here: {ctor: '::', _0: focus, _1: ctx.here},
+				pointer: function () {
+					var _p16 = ctx.pointer;
+					if (_p16.ctor === '[]') {
+						return {ctor: '[]'};
+					} else {
+						return _elm_lang$core$Native_Utils.eq(_p16._0, focus) ? _p16._1 : {ctor: '[]'};
+					}
+				}(),
 				cursor: function () {
 					var _p17 = ctx.cursor;
 					if (_p17.ctor === '[]') {
@@ -16354,35 +16734,27 @@ var _user$project$View$zoom = F2(
 					} else {
 						return _elm_lang$core$Native_Utils.eq(_p17._0, focus) ? _p17._1 : {ctor: '[]'};
 					}
-				}(),
-				caret: function () {
-					var _p18 = ctx.caret;
-					if (_p18.ctor === '[]') {
-						return {ctor: '[]'};
-					} else {
-						return _elm_lang$core$Native_Utils.eq(_p18._0, focus) ? _p18._1 : {ctor: '[]'};
-					}
 				}()
 			});
 	});
 var _user$project$View$view_typ = F2(
 	function (ctx, typ) {
-		var _p19 = typ;
-		switch (_p19.ctor) {
+		var _p18 = typ;
+		switch (_p18.ctor) {
 			case 'TCons':
-				if (_p19._1.ctor === '[]') {
+				if (_p18._1.ctor === '[]') {
 					return A2(
 						_elm_lang$html$Html$span,
 						A2(
 							_elm_lang$core$Basics_ops['++'],
-							_user$project$View$cursor_msgs(ctx),
+							_user$project$View$pointer_msgs(ctx),
 							{
 								ctor: '::',
 								_0: _elm_lang$html$Html_Attributes$style(
 									A2(
 										_elm_lang$core$Basics_ops['++'],
 										_user$project$SeColor$c(_user$project$SeColor$base0B),
-										_user$project$View$cursor_style(ctx))),
+										_user$project$View$pointer_style(ctx))),
 								_1: {ctor: '[]'}
 							}),
 						{
@@ -16390,13 +16762,13 @@ var _user$project$View$view_typ = F2(
 							_0: A2(
 								_user$project$View$view_qname,
 								A2(_user$project$View$zoom, _user$project$Lang$FTypName, ctx),
-								_p19._0),
+								_p18._0),
 							_1: {ctor: '[]'}
 						});
 				} else {
 					return A2(
 						_elm_lang$html$Html$span,
-						_user$project$View$cursor_msgs(ctx),
+						_user$project$View$pointer_msgs(ctx),
 						{
 							ctor: '::',
 							_0: _user$project$View$lparen(ctx.opts),
@@ -16405,7 +16777,7 @@ var _user$project$View$view_typ = F2(
 								_0: A2(
 									_user$project$View$view_qname,
 									A2(_user$project$View$zoom, _user$project$Lang$FTypName, ctx),
-									_p19._0),
+									_p18._0),
 								_1: {
 									ctor: '::',
 									_0: A2(
@@ -16415,7 +16787,7 @@ var _user$project$View$view_typ = F2(
 											_elm_lang$core$List$map,
 											_user$project$View$view_typ(
 												A2(_user$project$View$zoom, _user$project$Lang$FTypApplyArg, ctx)),
-											_p19._1)),
+											_p18._1)),
 									_1: {
 										ctor: '::',
 										_0: _user$project$View$rparen(ctx.opts),
@@ -16430,13 +16802,13 @@ var _user$project$View$view_typ = F2(
 					_elm_lang$html$Html$span,
 					A2(
 						_elm_lang$core$Basics_ops['++'],
-						_user$project$View$cursor_msgs(ctx),
+						_user$project$View$pointer_msgs(ctx),
 						{
 							ctor: '::',
 							_0: _elm_lang$html$Html_Attributes$style(
 								A2(
 									_elm_lang$core$Basics_ops['++'],
-									_user$project$View$cursor_style(ctx),
+									_user$project$View$pointer_style(ctx),
 									A2(
 										_elm_lang$core$Basics_ops['++'],
 										_user$project$View$var_style,
@@ -16446,7 +16818,7 @@ var _user$project$View$view_typ = F2(
 					{
 						ctor: '::',
 						_0: _elm_lang$html$Html$text(
-							A2(_user$project$View$snake, ctx.opts, _p19._0)),
+							A2(_user$project$View$snake, ctx.opts, _p18._0)),
 						_1: {ctor: '[]'}
 					});
 			case 'TArrow':
@@ -16454,11 +16826,11 @@ var _user$project$View$view_typ = F2(
 					_elm_lang$html$Html$span,
 					A2(
 						_elm_lang$core$Basics_ops['++'],
-						_user$project$View$cursor_msgs(ctx),
+						_user$project$View$pointer_msgs(ctx),
 						{
 							ctor: '::',
 							_0: _elm_lang$html$Html_Attributes$style(
-								_user$project$View$cursor_style(ctx)),
+								_user$project$View$pointer_style(ctx)),
 							_1: {ctor: '[]'}
 						}),
 					{
@@ -16466,7 +16838,7 @@ var _user$project$View$view_typ = F2(
 						_0: A2(
 							_user$project$View$view_typ,
 							A2(_user$project$View$zoom, _user$project$Lang$FTypArrowArg, ctx),
-							_p19._0),
+							_p18._0),
 						_1: {
 							ctor: '::',
 							_0: _user$project$View$keyword('→'),
@@ -16475,7 +16847,7 @@ var _user$project$View$view_typ = F2(
 								_0: A2(
 									_user$project$View$view_typ,
 									A2(_user$project$View$zoom, _user$project$Lang$FTypArrowResult, ctx),
-									_p19._1),
+									_p18._1),
 								_1: {ctor: '[]'}
 							}
 						}
@@ -16485,158 +16857,26 @@ var _user$project$View$view_typ = F2(
 					_elm_lang$html$Html$span,
 					A2(
 						_elm_lang$core$Basics_ops['++'],
-						_user$project$View$cursor_msgs(ctx),
+						_user$project$View$pointer_msgs(ctx),
 						{
 							ctor: '::',
 							_0: _elm_lang$html$Html_Attributes$style(
-								_user$project$View$cursor_style(ctx)),
+								_user$project$View$pointer_style(ctx)),
 							_1: {ctor: '[]'}
 						}),
 					{
 						ctor: '::',
 						_0: _elm_lang$html$Html$text(
-							_elm_lang$core$Basics$toString(_p19._0)),
+							_elm_lang$core$Basics$toString(_p18._0)),
 						_1: {ctor: '[]'}
 					});
 		}
 	});
-var _user$project$View$view_pattern = F2(
-	function (ctx, pattern) {
-		return A2(
-			_elm_lang$html$Html$span,
-			A2(
-				_elm_lang$core$Basics_ops['++'],
-				_user$project$View$cursor_msgs(ctx),
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$style(
-						A2(
-							_elm_lang$core$Basics_ops['++'],
-							_user$project$View$cursor_style(ctx),
-							A2(
-								_elm_lang$core$Basics_ops['++'],
-								_user$project$SeColor$fg(_user$project$SeColor$base08),
-								A2(
-									_elm_lang$core$Basics_ops['++'],
-									_user$project$SeColor$bg(_user$project$SeColor$base02),
-									{
-										ctor: '::',
-										_0: A2(_elm_community$basics_extra$Basics_Extra_ops['=>'], 'margin-right', '8px'),
-										_1: {ctor: '[]'}
-									})))),
-					_1: {ctor: '[]'}
-				}),
-			{
-				ctor: '::',
-				_0: function () {
-					var _p20 = pattern;
-					switch (_p20.ctor) {
-						case 'PCons':
-							return A2(
-								_elm_lang$html$Html$span,
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$style(
-										_user$project$View$with_border1(ctx.opts)),
-									_1: {ctor: '[]'}
-								},
-								A2(
-									_elm_lang$core$Basics_ops['++'],
-									{
-										ctor: '::',
-										_0: A2(_user$project$View$view_qname, ctx, _p20._0),
-										_1: {ctor: '[]'}
-									},
-									A2(
-										_elm_lang$core$List$map,
-										_user$project$View$view_pattern(ctx),
-										_p20._1)));
-						case 'PRecord':
-							return A2(
-								_elm_lang$html$Html$span,
-								{ctor: '[]'},
-								A2(
-									_elm_lang$core$Basics_ops['++'],
-									{
-										ctor: '::',
-										_0: _user$project$View$keyword('{'),
-										_1: {ctor: '[]'}
-									},
-									A2(
-										_elm_lang$core$Basics_ops['++'],
-										A2(
-											_elm_lang$core$List$map,
-											function (field) {
-												return A2(
-													_elm_lang$html$Html$span,
-													{ctor: '[]'},
-													{
-														ctor: '::',
-														_0: _elm_lang$html$Html$text(field),
-														_1: {
-															ctor: '::',
-															_0: _elm_lang$html$Html$text(','),
-															_1: {ctor: '[]'}
-														}
-													});
-											},
-											_p20._0),
-										{
-											ctor: '::',
-											_0: _user$project$View$keyword('}'),
-											_1: {ctor: '[]'}
-										})));
-						case 'PVar':
-							return A2(
-								_user$project$View$view_qname,
-								ctx,
-								_user$project$View$ligature(_p20._0));
-						case 'PLit':
-							return A2(_user$project$View$view_literal, ctx, _p20._0);
-						default:
-							return A2(
-								_elm_lang$html$Html$span,
-								{ctor: '[]'},
-								A2(
-									_elm_lang$core$Basics_ops['++'],
-									{
-										ctor: '::',
-										_0: _user$project$View$keyword('('),
-										_1: {ctor: '[]'}
-									},
-									A2(
-										_elm_lang$core$Basics_ops['++'],
-										A2(
-											_elm_lang$core$List$intersperse,
-											_user$project$View$keyword(','),
-											A2(
-												_elm_lang$core$List$indexedMap,
-												F2(
-													function (n, p) {
-														return A2(
-															_user$project$View$view_pattern,
-															A2(
-																_user$project$View$zoom,
-																_user$project$Lang$FTup(n),
-																ctx),
-															p);
-													}),
-												_p20._0)),
-										{
-											ctor: '::',
-											_0: _user$project$View$keyword(')'),
-											_1: {ctor: '[]'}
-										})));
-					}
-				}(),
-				_1: {ctor: '[]'}
-			});
-	});
 var _user$project$View$view_patmat = F3(
 	function (ctx, exp, cases) {
 		var view_case = F2(
-			function (n, _p21) {
-				var _p22 = _p21;
+			function (n, _p19) {
+				var _p20 = _p19;
 				return A2(
 					_elm_lang$html$Html$tr,
 					{ctor: '[]'},
@@ -16649,7 +16889,7 @@ var _user$project$View$view_patmat = F3(
 								_0: _elm_lang$html$Html_Attributes$style(
 									A2(
 										_elm_lang$core$Basics_ops['++'],
-										_user$project$View$cursor_style(
+										_user$project$View$pointer_style(
 											A2(
 												_user$project$View$zoom,
 												_user$project$Lang$FCasePattern(n),
@@ -16674,24 +16914,22 @@ var _user$project$View$view_patmat = F3(
 							{
 								ctor: '::',
 								_0: A2(
-									_user$project$View$view_pattern,
+									_user$project$View$view_exp,
 									A2(
 										_user$project$View$zoom,
 										_user$project$Lang$FCasePattern(n),
-										ctx),
-									_p22._0),
+										_elm_lang$core$Native_Utils.update(
+											ctx,
+											{is_pattern: true})),
+									_p20._0),
 								_1: {
 									ctor: '::',
 									_0: A2(
 										_elm_lang$html$Html$span,
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$class('arrow'),
-											_1: {
-												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$style(_user$project$View$pat_arrow_style),
-												_1: {ctor: '[]'}
-											}
+											_0: _elm_lang$html$Html_Attributes$style(_user$project$View$pat_arrow_style),
+											_1: {ctor: '[]'}
 										},
 										{
 											ctor: '::',
@@ -16733,7 +16971,7 @@ var _user$project$View$view_patmat = F3(
 											_user$project$View$zoom,
 											_user$project$Lang$FCaseResult(n),
 											ctx),
-										_p22._1),
+										_p20._1),
 									_1: {ctor: '[]'}
 								}),
 							_1: {ctor: '[]'}
@@ -16744,7 +16982,7 @@ var _user$project$View$view_patmat = F3(
 			_elm_lang$html$Html$table,
 			A2(
 				_elm_lang$core$Basics_ops['++'],
-				_user$project$View$cursor_msgs(ctx),
+				_user$project$View$pointer_msgs(ctx),
 				{ctor: '[]'}),
 			A2(
 				_elm_lang$core$Basics_ops['++'],
@@ -16816,21 +17054,29 @@ var _user$project$View$view_patmat = F3(
 	});
 var _user$project$View$view_exp = F2(
 	function (ctx, exp) {
+		var pattern_error = A2(
+			_elm_lang$html$Html$span,
+			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: _user$project$View$keyword('PATTERN ERROR'),
+				_1: {ctor: '[]'}
+			});
 		var it = function () {
-			var _p23 = exp;
-			switch (_p23.ctor) {
+			var _p21 = exp;
+			switch (_p21.ctor) {
 				case 'Let':
-					return A2(
+					return ctx.is_pattern ? pattern_error : A2(
 						_elm_lang$html$Html$span,
 						A2(
 							_elm_lang$core$Basics_ops['++'],
-							_user$project$View$cursor_msgs(ctx),
+							_user$project$View$pointer_msgs(ctx),
 							{
 								ctor: '::',
 								_0: _elm_lang$html$Html_Attributes$style(
 									A2(
 										_elm_lang$core$Basics_ops['++'],
-										_user$project$View$cursor_style(ctx),
+										_user$project$View$pointer_style(ctx),
 										_user$project$View$with_border1(ctx.opts))),
 								_1: {ctor: '[]'}
 							}),
@@ -16842,7 +17088,7 @@ var _user$project$View$view_exp = F2(
 								_0: A2(
 									_user$project$View$view_bindings,
 									A2(_user$project$View$zoom, _user$project$Lang$FLetBindings, ctx),
-									_p23._0),
+									_p21._0),
 								_1: {
 									ctor: '::',
 									_0: _user$project$View$keyword('in'),
@@ -16851,57 +17097,58 @@ var _user$project$View$view_exp = F2(
 										_0: A2(
 											_user$project$View$view_exp,
 											A2(_user$project$View$zoom, _user$project$Lang$FLetExp, ctx),
-											_p23._1),
+											_p21._1),
 										_1: {ctor: '[]'}
 									}
 								}
 							}
 						});
 				case 'Lam':
-					return A2(
+					return ctx.is_pattern ? pattern_error : A2(
 						_elm_lang$html$Html$span,
-						A2(
-							_elm_lang$core$Basics_ops['++'],
-							_user$project$View$cursor_msgs(ctx),
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$style(
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$style(
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									_user$project$View$border_style,
 									A2(
 										_elm_lang$core$Basics_ops['++'],
-										_user$project$View$border_style,
-										A2(
-											_elm_lang$core$Basics_ops['++'],
-											_user$project$SeColor$c(_user$project$SeColor$base0E),
-											_user$project$View$with_border1(ctx.opts)))),
-								_1: {ctor: '[]'}
-							}),
+										_user$project$SeColor$c(_user$project$SeColor$base0E),
+										_user$project$View$with_border1(ctx.opts)))),
+							_1: {ctor: '[]'}
+						},
 						{
 							ctor: '::',
 							_0: _user$project$View$lparen(ctx.opts),
 							_1: {
 								ctor: '::',
-								_0: ctx.opts.parens ? _user$project$View$keyword('λ') : _elm_lang$html$Html$text(''),
+								_0: _user$project$View$keyword('λ'),
 								_1: {
 									ctor: '::',
 									_0: A2(
 										_elm_lang$html$Html$span,
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$class('name'),
-											_1: {
+										A2(
+											_elm_lang$core$Basics_ops['++'],
+											_user$project$View$pointer_msgs(
+												A2(_user$project$View$zoom, _user$project$Lang$FLamArg, ctx)),
+											{
 												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$style(
-													A2(
-														_elm_lang$core$Basics_ops['++'],
-														_user$project$View$var_style,
-														_user$project$View$cursor_style(
-															A2(_user$project$View$zoom, _user$project$Lang$FLamArg, ctx)))),
-												_1: {ctor: '[]'}
-											}
-										},
+												_0: _elm_lang$html$Html_Attributes$class('name'),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$style(
+														A2(
+															_elm_lang$core$Basics_ops['++'],
+															_user$project$View$var_style,
+															_user$project$View$pointer_style(
+																A2(_user$project$View$zoom, _user$project$Lang$FLamArg, ctx)))),
+													_1: {ctor: '[]'}
+												}
+											}),
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html$text(_p23._0),
+											_0: _elm_lang$html$Html$text(_p21._0),
 											_1: {ctor: '[]'}
 										}),
 									_1: {
@@ -16912,7 +17159,7 @@ var _user$project$View$view_exp = F2(
 											_0: A2(
 												_user$project$View$view_exp,
 												A2(_user$project$View$zoom, _user$project$Lang$FLamExp, ctx),
-												_p23._1),
+												_p21._1),
 											_1: {
 												ctor: '::',
 												_0: _user$project$View$rparen(ctx.opts),
@@ -16924,19 +17171,19 @@ var _user$project$View$view_exp = F2(
 							}
 						});
 				case 'Apply':
-					return A3(_user$project$View$view_apply, ctx, _p23._0, _p23._1);
+					return A3(_user$project$View$view_apply, ctx, _p21._0, _p21._1);
 				case 'Var':
 					return A2(
 						_elm_lang$html$Html$span,
 						A2(
 							_elm_lang$core$Basics_ops['++'],
-							_user$project$View$cursor_msgs(ctx),
+							_user$project$View$pointer_msgs(ctx),
 							{
 								ctor: '::',
 								_0: _elm_lang$html$Html_Attributes$style(
 									A2(
 										_elm_lang$core$Basics_ops['++'],
-										_user$project$View$cursor_style(ctx),
+										_user$project$View$pointer_style(ctx),
 										_user$project$View$with_border1(ctx.opts))),
 								_1: {ctor: '[]'}
 							}),
@@ -16945,23 +17192,23 @@ var _user$project$View$view_exp = F2(
 							_0: A2(
 								_user$project$View$view_qname,
 								ctx,
-								_user$project$View$ligature(_p23._0)),
+								_user$project$View$ligature(_p21._0)),
 							_1: {ctor: '[]'}
 						});
 				case 'Case':
-					return A3(_user$project$View$view_patmat, ctx, _p23._0, _p23._1);
+					return ctx.is_pattern ? pattern_error : A3(_user$project$View$view_patmat, ctx, _p21._0, _p21._1);
 				case 'Lit':
 					return A2(
 						_elm_lang$html$Html$span,
 						A2(
 							_elm_lang$core$Basics_ops['++'],
-							_user$project$View$cursor_msgs(ctx),
+							_user$project$View$pointer_msgs(ctx),
 							{
 								ctor: '::',
 								_0: _elm_lang$html$Html_Attributes$style(
 									A2(
 										_elm_lang$core$Basics_ops['++'],
-										_user$project$View$cursor_style(ctx),
+										_user$project$View$pointer_style(ctx),
 										A2(
 											_elm_lang$core$Basics_ops['++'],
 											_user$project$View$lit_style,
@@ -16970,7 +17217,7 @@ var _user$project$View$view_exp = F2(
 							}),
 						{
 							ctor: '::',
-							_0: A2(_user$project$View$view_literal, ctx, _p23._0),
+							_0: A2(_user$project$View$view_literal, ctx, _p21._0),
 							_1: {ctor: '[]'}
 						});
 				case 'Tup':
@@ -17001,7 +17248,7 @@ var _user$project$View$view_exp = F2(
 														ctx),
 													exp);
 											}),
-										_p23._0)),
+										_p21._0)),
 								{
 									ctor: '::',
 									_0: _user$project$View$keyword(')'),
@@ -17009,7 +17256,7 @@ var _user$project$View$view_exp = F2(
 								})));
 				default:
 					return _elm_lang$html$Html$text(
-						_elm_lang$core$Basics$toString(_p23._0));
+						_elm_lang$core$Basics$toString(_p21._0));
 			}
 		}();
 		return it;
@@ -17029,7 +17276,7 @@ var _user$project$View$view_apply = F3(
 								A2(
 									_elm_lang$core$Basics_ops['++'],
 									_user$project$View$with_border1(ctx.opts),
-									_user$project$View$cursor_style(ctx))),
+									_user$project$View$pointer_style(ctx))),
 							_1: {ctor: '[]'}
 						}
 					},
@@ -17081,21 +17328,17 @@ var _user$project$View$view_apply = F3(
 						}
 					});
 			});
-		var _p24 = {ctor: '_Tuple2', _0: ctx.opts.infix, _1: f};
-		if (((((_p24.ctor === '_Tuple2') && (_p24._0 === true)) && (_p24._1.ctor === 'Apply')) && (_p24._1._0.ctor === 'Var')) && (_p24._1._0._0.ctor === '_Tuple2')) {
-			var _p26 = _p24._1._1;
-			var _p25 = _p24._1._0._0._1;
-			return _user$project$View$is_infix(_p25) ? A2(render, f, x) : A2(
+		var _p22 = {ctor: '_Tuple2', _0: ctx.opts.infix, _1: f};
+		if (((((_p22.ctor === '_Tuple2') && (_p22._0 === true)) && (_p22._1.ctor === 'Apply')) && (_p22._1._0.ctor === 'Var')) && (_p22._1._0._0.ctor === '_Tuple2')) {
+			var _p24 = _p22._1._1;
+			var _p23 = _p22._1._0._0._1;
+			return (!_user$project$Lang$is_infix(_p23)) ? A2(render, f, x) : A2(
 				_elm_lang$html$Html$span,
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class('exp apply op'),
-					_1: {
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$style(
-							_user$project$View$with_border1(ctx.opts)),
-						_1: {ctor: '[]'}
-					}
+					_0: _elm_lang$html$Html_Attributes$style(
+						_user$project$View$with_border1(ctx.opts)),
+					_1: {ctor: '[]'}
 				},
 				{
 					ctor: '::',
@@ -17104,7 +17347,7 @@ var _user$project$View$view_apply = F3(
 						ctor: '::',
 						_0: A2(
 							_elm_lang$html$Html$span,
-							ctx.opts.parens ? {ctor: '[]'} : _user$project$View$maybe_box(_p26),
+							ctx.opts.parens ? {ctor: '[]'} : _user$project$View$maybe_box(_p24),
 							{
 								ctor: '::',
 								_0: A2(
@@ -17113,7 +17356,7 @@ var _user$project$View$view_apply = F3(
 										_user$project$View$zoom,
 										_user$project$Lang$FApplyFun,
 										A2(_user$project$View$zoom, _user$project$Lang$FApplyFun, ctx)),
-									_p26),
+									_p24),
 								_1: {ctor: '[]'}
 							}),
 						_1: {
@@ -17158,7 +17401,7 @@ var _user$project$View$view_apply = F3(
 												_user$project$Lang$FApplyFun,
 												A2(_user$project$View$zoom, _user$project$Lang$FApplyArg, ctx)),
 											_user$project$Lang$Var(
-												{ctor: '_Tuple2', _0: _p24._1._0._0._0, _1: _p25})),
+												{ctor: '_Tuple2', _0: _p22._1._0._0._0, _1: _p23})),
 										_1: {ctor: '[]'}
 									}),
 								_1: {
@@ -17213,11 +17456,7 @@ var _user$project$View$view_bindings = F2(
 					ctor: '::',
 					_0: A2(
 						_elm_lang$html$Html$span,
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('name'),
-							_1: {ctor: '[]'}
-						},
+						{ctor: '[]'},
 						{
 							ctor: '::',
 							_0: _elm_lang$html$Html$text(
@@ -17254,13 +17493,16 @@ var _user$project$View$view_bindings = F2(
 								_elm_lang$html$Html$span,
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class('name'),
-									_1: {
-										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$style(
-											_user$project$SeColor$c(_user$project$SeColor$base0E)),
-										_1: {ctor: '[]'}
-									}
+									_0: _elm_lang$html$Html_Attributes$style(
+										A2(
+											_elm_lang$core$Basics_ops['++'],
+											_user$project$SeColor$c(_user$project$SeColor$base0E),
+											_user$project$View$pointer_style(
+												A2(
+													_user$project$View$zoom,
+													_user$project$Lang$FBindingName(n),
+													ctx)))),
+									_1: {ctor: '[]'}
 								},
 								{
 									ctor: '::',
@@ -17282,76 +17524,8 @@ var _user$project$View$view_bindings = F2(
 										typ),
 									_1: {
 										ctor: '::',
-										_0: _user$project$View$keyword(''),
-										_1: {
-											ctor: '::',
-											_0: A2(
-												_elm_lang$html$Html$span,
-												{
-													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$style(
-														_user$project$SeColor$c(_user$project$SeColor$base02)),
-													_1: {ctor: '[]'}
-												},
-												{
-													ctor: '::',
-													_0: _elm_lang$html$Html$text('with '),
-													_1: {ctor: '[]'}
-												}),
-											_1: {
-												ctor: '::',
-												_0: A2(
-													_elm_lang$html$Html$span,
-													{
-														ctor: '::',
-														_0: _elm_lang$html$Html_Attributes$style(
-															_user$project$SeColor$c(_user$project$SeColor$base03)),
-														_1: {ctor: '[]'}
-													},
-													{
-														ctor: '::',
-														_0: _elm_lang$html$Html$text('Basics, '),
-														_1: {ctor: '[]'}
-													}),
-												_1: {
-													ctor: '::',
-													_0: A2(
-														_elm_lang$html$Html$span,
-														{
-															ctor: '::',
-															_0: _elm_lang$html$Html_Attributes$style(
-																_user$project$SeColor$c(_user$project$SeColor$base03)),
-															_1: {ctor: '[]'}
-														},
-														{
-															ctor: '::',
-															_0: _elm_lang$html$Html$text('List, '),
-															_1: {ctor: '[]'}
-														}),
-													_1: {
-														ctor: '::',
-														_0: A2(
-															_elm_lang$html$Html$span,
-															{
-																ctor: '::',
-																_0: _elm_lang$html$Html_Attributes$style(
-																	_user$project$SeColor$c(_user$project$SeColor$base03)),
-																_1: {ctor: '[]'}
-															},
-															{
-																ctor: '::',
-																_0: _elm_lang$html$Html$text('Html '),
-																_1: {ctor: '[]'}
-															}),
-														_1: {
-															ctor: '::',
-															_0: _user$project$View$keyword('='),
-															_1: {ctor: '[]'}
-														}
-													}
-												}
-											}
-										}
+										_0: _user$project$View$keyword('='),
+										_1: {ctor: '[]'}
 									}
 								}
 							}
@@ -17381,7 +17555,7 @@ var _user$project$View$view_bindings = F2(
 			{
 				ctor: '::',
 				_0: _elm_lang$html$Html_Attributes$style(
-					_user$project$View$cursor_style(ctx)),
+					_user$project$View$pointer_style(ctx)),
 				_1: {ctor: '[]'}
 			},
 			A2(
@@ -17391,9 +17565,9 @@ var _user$project$View$view_bindings = F2(
 					A2(
 						_Gizra$elm_dictlist$DictList$indexedMap,
 						F3(
-							function (n, name, _p27) {
-								var _p28 = _p27;
-								var _p30 = _p28._1;
+							function (n, name, _p25) {
+								var _p26 = _p25;
+								var _p28 = _p26._1;
 								return A2(
 									_elm_lang$html$Html$div,
 									{
@@ -17407,19 +17581,19 @@ var _user$project$View$view_bindings = F2(
 										_1: {ctor: '[]'}
 									},
 									function () {
-										var _p29 = _p28._0;
-										if (_p29.ctor === 'Just') {
-											return A4(view_binding_with_typ, _p29._0, n, name, _p30);
+										var _p27 = _p26._0;
+										if (_p27.ctor === 'Just') {
+											return A4(view_binding_with_typ, _p27._0, n, name, _p28);
 										} else {
-											return A3(view_binding_no_typ, n, name, _p30);
+											return A3(view_binding_no_typ, n, name, _p28);
 										}
 									}());
 							}),
 						bindings))));
 	});
 var _user$project$View$view_module = F2(
-	function (ctx, _p31) {
-		var _p32 = _p31;
+	function (ctx, _p29) {
+		var _p30 = _p29;
 		return A2(
 			_elm_lang$html$Html$div,
 			{
@@ -17434,7 +17608,7 @@ var _user$project$View$view_module = F2(
 			},
 			{
 				ctor: '::',
-				_0: A2(_user$project$View$view_bindings, ctx, _p32.bindings),
+				_0: A2(_user$project$View$view_bindings, ctx, _p30.bindings),
 				_1: {ctor: '[]'}
 			});
 	});
@@ -17442,7 +17616,8 @@ var _user$project$View$init_ctx = {
 	opts: _user$project$Model$init_opts,
 	here: {ctor: '[]'},
 	cursor: {ctor: '[]'},
-	caret: {ctor: '[]'}
+	pointer: {ctor: '[]'},
+	is_pattern: false
 };
 var _user$project$View$view = function (model) {
 	return A2(
@@ -17467,7 +17642,7 @@ var _user$project$View$view = function (model) {
 					{ctor: '[]'},
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text('window.addEventListener(\"keydown\", (e) => e.preventDefault())'),
+						_0: _elm_lang$html$Html$text('window.addEventListener(\"keydown\", (e) => { if (e.key.indexOf(\"Arrow\") != -1 ) { e.preventDefault() }})'),
 						_1: {ctor: '[]'}
 					}),
 				_1: {
@@ -17500,7 +17675,7 @@ var _user$project$View$view = function (model) {
 								{
 									ctor: '::',
 									_0: _elm_lang$html$Html_Events$onMouseLeave(
-										_user$project$Model$ChangeCursor(
+										_user$project$Model$ChangePointer(
 											{ctor: '[]'})),
 									_1: {ctor: '[]'}
 								},
@@ -17510,7 +17685,7 @@ var _user$project$View$view = function (model) {
 										_user$project$View$view_module,
 										_elm_lang$core$Native_Utils.update(
 											_user$project$View$init_ctx,
-											{opts: model.opts, cursor: model.cursor, caret: model.caret}),
+											{opts: model.opts, pointer: model.pointer, cursor: model.cursor}),
 										model.ast),
 									_1: {ctor: '[]'}
 								}),
@@ -17522,7 +17697,7 @@ var _user$project$View$view = function (model) {
 									{
 										ctor: '::',
 										_0: _elm_lang$html$Html$text(
-											_elm_lang$core$Basics$toString(model.cursor)),
+											_elm_lang$core$Basics$toString(model.pointer)),
 										_1: {ctor: '[]'}
 									}),
 								_1: {
@@ -17533,10 +17708,22 @@ var _user$project$View$view = function (model) {
 										{
 											ctor: '::',
 											_0: _elm_lang$html$Html$text(
-												_elm_lang$core$Basics$toString(model.caret)),
+												_elm_lang$core$Basics$toString(model.cursor)),
 											_1: {ctor: '[]'}
 										}),
-									_1: {ctor: '[]'}
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$pre,
+											{ctor: '[]'},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text(
+													A2(_user$project$Lang$str_bindings, 0, model.ast.bindings)),
+												_1: {ctor: '[]'}
+											}),
+										_1: {ctor: '[]'}
+									}
 								}
 							}
 						}
@@ -17545,9 +17732,9 @@ var _user$project$View$view = function (model) {
 			}
 		});
 };
-var _user$project$View$Context = F4(
-	function (a, b, c, d) {
-		return {opts: a, here: b, cursor: c, caret: d};
+var _user$project$View$Context = F5(
+	function (a, b, c, d, e) {
+		return {opts: a, here: b, cursor: c, pointer: d, is_pattern: e};
 	});
 var _user$project$Translate$to_str = function (s) {
 	return _user$project$Lang$Lit(
@@ -17582,20 +17769,24 @@ var _user$project$Translate$translate_access = F2(
 				{ctor: '_Tuple3', _0: 'Access', _1: exp, _2: names});
 		}
 	});
-var _user$project$Translate$translate_pattern = function (exp) {
-	var _p3 = exp;
+var _user$project$Translate$translate_exp = function (ast_exp) {
+	var _p3 = ast_exp;
 	switch (_p3.ctor) {
-		case 'Tuple':
-			return _user$project$Lang$PTup(
-				A2(
-					_elm_lang$core$List$map,
-					function (exp) {
-						return _user$project$Translate$translate_pattern(exp);
-					},
-					_p3._0));
+		case 'Character':
+			return _user$project$Lang$Lit(
+				_user$project$Lang$Char(_p3._0));
+		case 'String':
+			return _user$project$Lang$Lit(
+				_user$project$Lang$String(_p3._0));
+		case 'Integer':
+			return _user$project$Lang$Lit(
+				_user$project$Lang$Int(_p3._0));
+		case 'Float':
+			return _user$project$Lang$Lit(
+				_user$project$Lang$Float(_p3._0));
 		case 'Variable':
 			var _p4 = _p3._0;
-			return _user$project$Lang$PVar(
+			return _user$project$Lang$Var(
 				{
 					ctor: '_Tuple2',
 					_0: (_elm_lang$core$Native_Utils.cmp(
@@ -17604,51 +17795,6 @@ var _user$project$Translate$translate_pattern = function (exp) {
 					_1: A2(
 						_elm_community$maybe_extra$Maybe_Extra_ops['?'],
 						_elm_community$list_extra$List_Extra$last(_p4),
-						'')
-				});
-		case 'Character':
-			return _user$project$Lang$PLit(
-				_user$project$Lang$Char(_p3._0));
-		case 'Integer':
-			return _user$project$Lang$PLit(
-				_user$project$Lang$Int(_p3._0));
-		default:
-			return A2(
-				_user$project$Lang$PCons,
-				{
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Maybe$Just('Basics'),
-					_1: _elm_lang$core$Basics$toString(exp)
-				},
-				{ctor: '[]'});
-	}
-};
-var _user$project$Translate$translate_exp = function (ast_exp) {
-	var _p5 = ast_exp;
-	switch (_p5.ctor) {
-		case 'Character':
-			return _user$project$Lang$Lit(
-				_user$project$Lang$Char(_p5._0));
-		case 'String':
-			return _user$project$Lang$Lit(
-				_user$project$Lang$String(_p5._0));
-		case 'Integer':
-			return _user$project$Lang$Lit(
-				_user$project$Lang$Int(_p5._0));
-		case 'Float':
-			return _user$project$Lang$Lit(
-				_user$project$Lang$Float(_p5._0));
-		case 'Variable':
-			var _p6 = _p5._0;
-			return _user$project$Lang$Var(
-				{
-					ctor: '_Tuple2',
-					_0: (_elm_lang$core$Native_Utils.cmp(
-						_elm_lang$core$List$length(_p6),
-						1) > 0) ? _elm_lang$core$List$head(_p6) : _elm_lang$core$Maybe$Nothing,
-					_1: A2(
-						_elm_community$maybe_extra$Maybe_Extra_ops['?'],
-						_elm_community$list_extra$List_Extra$last(_p6),
 						'')
 				});
 		case 'List':
@@ -17671,7 +17817,7 @@ var _user$project$Translate$translate_exp = function (ast_exp) {
 									a),
 								b);
 						}),
-					A2(_elm_lang$core$List$map, _user$project$Translate$translate_exp, _p5._0)),
+					A2(_elm_lang$core$List$map, _user$project$Translate$translate_exp, _p3._0)),
 				_user$project$Lang$Var(
 					{
 						ctor: '_Tuple2',
@@ -17679,86 +17825,82 @@ var _user$project$Translate$translate_exp = function (ast_exp) {
 						_1: '[]'
 					}));
 		case 'Access':
-			return A2(_user$project$Translate$translate_access, _p5._0, _p5._1);
+			return A2(_user$project$Translate$translate_access, _p3._0, _p3._1);
 		case 'Record':
 			return _user$project$Translate$to_str(
-				{ctor: '_Tuple2', _0: 'Record', _1: _p5._0});
+				{ctor: '_Tuple2', _0: 'Record', _1: _p3._0});
 		case 'RecordUpdate':
 			return _user$project$Translate$to_str(
-				{ctor: '_Tuple3', _0: 'RecordUpdate', _1: _p5._0, _2: _p5._1});
+				{ctor: '_Tuple3', _0: 'RecordUpdate', _1: _p3._0, _2: _p3._1});
 		case 'If':
 			return A2(
 				_user$project$Lang$Case,
-				_user$project$Translate$translate_exp(_p5._0),
+				_user$project$Translate$translate_exp(_p3._0),
 				{
 					ctor: '::',
 					_0: {
 						ctor: '_Tuple2',
-						_0: A2(
-							_user$project$Lang$PCons,
+						_0: _user$project$Lang$Var(
 							{
 								ctor: '_Tuple2',
 								_0: _elm_lang$core$Maybe$Just('Basics'),
 								_1: 'True'
-							},
-							{ctor: '[]'}),
-						_1: _user$project$Translate$translate_exp(_p5._1)
+							}),
+						_1: _user$project$Translate$translate_exp(_p3._1)
 					},
 					_1: {
 						ctor: '::',
 						_0: {
 							ctor: '_Tuple2',
-							_0: A2(
-								_user$project$Lang$PCons,
+							_0: _user$project$Lang$Var(
 								{
 									ctor: '_Tuple2',
 									_0: _elm_lang$core$Maybe$Just('Basics'),
 									_1: 'False'
-								},
-								{ctor: '[]'}),
-							_1: _user$project$Translate$translate_exp(_p5._2)
+								}),
+							_1: _user$project$Translate$translate_exp(_p3._2)
 						},
 						_1: {ctor: '[]'}
 					}
 				});
 		case 'Let':
 			return _user$project$Translate$to_str(
-				{ctor: '_Tuple3', _0: 'Let', _1: _p5._0, _2: _p5._1});
+				{ctor: '_Tuple3', _0: 'Let', _1: _p3._0, _2: _p3._1});
 		case 'Case':
 			return A2(
 				_user$project$Lang$Case,
-				_user$project$Translate$translate_exp(_p5._0),
+				_user$project$Translate$translate_exp(_p3._0),
 				A2(
 					_elm_lang$core$List$map,
-					function (_p7) {
-						var _p8 = _p7;
+					function (_p5) {
+						var _p6 = _p5;
 						return {
 							ctor: '_Tuple2',
-							_0: _user$project$Translate$translate_pattern(_p8._0),
-							_1: _user$project$Translate$translate_exp(_p8._1)
+							_0: _user$project$Translate$translate_exp(_p6._0),
+							_1: _user$project$Translate$translate_exp(_p6._1)
 						};
 					},
-					_p5._1));
+					_p3._1));
 		case 'Lambda':
-			var _p11 = _p5._0;
-			var _p10 = _p5._1;
-			var _p9 = _elm_lang$core$List$head(_p11);
-			if ((((_p9.ctor === 'Just') && (_p9._0.ctor === 'Variable')) && (_p9._0._0.ctor === '::')) && (_p9._0._0._1.ctor === '[]')) {
+			var _p9 = _p3._0;
+			var _p8 = _p3._1;
+			var _p7 = _elm_lang$core$List$head(_p9);
+			if ((((_p7.ctor === 'Just') && (_p7._0.ctor === 'Variable')) && (_p7._0._0.ctor === '::')) && (_p7._0._0._1.ctor === '[]')) {
 				return A2(
 					_user$project$Lang$Lam,
-					_p9._0._0._0,
-					_user$project$Translate$translate_exp(_p10));
+					_p7._0._0._0,
+					_user$project$Translate$translate_exp(_p8));
 			} else {
 				return _user$project$Translate$to_str(
-					{ctor: '_Tuple3', _0: 'Lambda', _1: _p11, _2: _p10});
+					{ctor: '_Tuple3', _0: 'Lambda', _1: _p9, _2: _p8});
 			}
 		case 'Application':
 			return A2(
 				_user$project$Lang$Apply,
-				_user$project$Translate$translate_exp(_p5._0),
-				_user$project$Translate$translate_exp(_p5._1));
+				_user$project$Translate$translate_exp(_p3._0),
+				_user$project$Translate$translate_exp(_p3._1));
 		case 'BinOp':
-			if (((_p5._0.ctor === 'Variable') && (_p5._0._0.ctor === '::')) && (_p5._0._0._1.ctor === '[]')) {
+			if (((_p3._0.ctor === 'Variable') && (_p3._0._0.ctor === '::')) && (_p3._0._0._1.ctor === '[]')) {
 				return A2(
 					_user$project$Lang$Apply,
 					A2(
@@ -17767,18 +17909,18 @@ var _user$project$Translate$translate_exp = function (ast_exp) {
 							{
 								ctor: '_Tuple2',
 								_0: _elm_lang$core$Maybe$Just('Basics'),
-								_1: _p5._0._0._0
+								_1: _p3._0._0._0
 							}),
-						_user$project$Translate$translate_exp(_p5._1)),
-					_user$project$Translate$translate_exp(_p5._2));
+						_user$project$Translate$translate_exp(_p3._1)),
+					_user$project$Translate$translate_exp(_p3._2));
 			} else {
 				return A2(
 					_user$project$Lang$Apply,
 					A2(
 						_user$project$Lang$Apply,
-						_user$project$Translate$translate_exp(_p5._0),
-						_user$project$Translate$translate_exp(_p5._1)),
-					_user$project$Translate$translate_exp(_p5._2));
+						_user$project$Translate$translate_exp(_p3._0),
+						_user$project$Translate$translate_exp(_p3._1)),
+					_user$project$Translate$translate_exp(_p3._2));
 			}
 		case 'Tuple':
 			return _user$project$Lang$Tup(
@@ -17787,17 +17929,17 @@ var _user$project$Translate$translate_exp = function (ast_exp) {
 					function (exp) {
 						return _user$project$Translate$translate_exp(exp);
 					},
-					_p5._0));
+					_p3._0));
 		default:
 			return _user$project$Translate$to_str(
-				{ctor: '_Tuple3', _0: 'AccessFunction', _1: '', _2: _p5._0});
+				{ctor: '_Tuple3', _0: 'AccessFunction', _1: '', _2: _p3._0});
 	}
 };
 var _user$project$Translate$translate_typ = function (ast_typ) {
-	var _p12 = ast_typ;
-	switch (_p12.ctor) {
+	var _p10 = ast_typ;
+	switch (_p10.ctor) {
 		case 'TypeConstructor':
-			var _p13 = _p12._0;
+			var _p11 = _p10._0;
 			return A2(
 				_user$project$Lang$TCons,
 				{
@@ -17805,101 +17947,101 @@ var _user$project$Translate$translate_typ = function (ast_typ) {
 					_0: A2(
 						_elm_lang$core$Maybe$map,
 						_elm_lang$core$String$concat,
-						_elm_community$list_extra$List_Extra$init(_p13)),
+						_elm_community$list_extra$List_Extra$init(_p11)),
 					_1: A2(
 						_elm_community$maybe_extra$Maybe_Extra_ops['?'],
-						_elm_community$list_extra$List_Extra$last(_p13),
+						_elm_community$list_extra$List_Extra$last(_p11),
 						'')
 				},
-				A2(_elm_lang$core$List$map, _user$project$Translate$translate_typ, _p12._1));
+				A2(_elm_lang$core$List$map, _user$project$Translate$translate_typ, _p10._1));
 		case 'TypeVariable':
-			return _user$project$Lang$TVar(_p12._0);
+			return _user$project$Lang$TVar(_p10._0);
 		case 'TypeRecordConstructor':
 			return _user$project$Lang$TVar(
 				_elm_lang$core$Basics$toString(
-					{ctor: '_Tuple2', _0: _p12._0, _1: _p12._1}));
+					{ctor: '_Tuple2', _0: _p10._0, _1: _p10._1}));
 		case 'TypeRecord':
 			return _user$project$Lang$TVar(
-				_elm_lang$core$Basics$toString(_p12._0));
+				_elm_lang$core$Basics$toString(_p10._0));
 		case 'TypeTuple':
 			return _user$project$Lang$TVar(
-				_elm_lang$core$Basics$toString(_p12._0));
+				_elm_lang$core$Basics$toString(_p10._0));
 		default:
 			return A2(
 				_user$project$Lang$TArrow,
-				_user$project$Translate$translate_typ(_p12._0),
-				_user$project$Translate$translate_typ(_p12._1));
+				_user$project$Translate$translate_typ(_p10._0),
+				_user$project$Translate$translate_typ(_p10._1));
 	}
 };
 var _user$project$Translate$translate_module = function (ss) {
 	var translate = function (ss) {
 		translate:
 		while (true) {
-			var _p14 = ss;
-			_v6_3:
+			var _p12 = ss;
+			_v5_3:
 			do {
-				if (_p14.ctor === '::') {
-					switch (_p14._0.ctor) {
+				if (_p12.ctor === '::') {
+					switch (_p12._0.ctor) {
 						case 'FunctionTypeDeclaration':
-							if ((_p14._1.ctor === '::') && (_p14._1._0.ctor === 'FunctionDeclaration')) {
+							if ((_p12._1.ctor === '::') && (_p12._1._0.ctor === 'FunctionDeclaration')) {
 								var lam = function (ns) {
-									var _p15 = ns;
-									if (_p15.ctor === '::') {
-										if (((_p15._0.ctor === 'Variable') && (_p15._0._0.ctor === '::')) && (_p15._0._0._1.ctor === '[]')) {
+									var _p13 = ns;
+									if (_p13.ctor === '::') {
+										if (((_p13._0.ctor === 'Variable') && (_p13._0._0.ctor === '::')) && (_p13._0._0._1.ctor === '[]')) {
 											return A2(
 												_user$project$Lang$Lam,
-												_p15._0._0._0,
-												lam(_p15._1));
+												_p13._0._0._0,
+												lam(_p13._1));
 										} else {
 											return _user$project$Translate$to_str(
-												{ctor: '_Tuple3', _0: 'Lambda', _1: _p15._1, _2: _p15._0});
+												{ctor: '_Tuple3', _0: 'Lambda', _1: _p13._1, _2: _p13._0});
 										}
 									} else {
-										return _user$project$Translate$translate_exp(_p14._1._0._2);
+										return _user$project$Translate$translate_exp(_p12._1._0._2);
 									}
 								};
 								return {
 									ctor: '::',
 									_0: {
 										ctor: '_Tuple2',
-										_0: _p14._1._0._0,
+										_0: _p12._1._0._0,
 										_1: {
 											ctor: '_Tuple2',
 											_0: _elm_lang$core$Maybe$Just(
-												_user$project$Translate$translate_typ(_p14._0._1)),
-											_1: lam(_p14._1._0._1)
+												_user$project$Translate$translate_typ(_p12._0._1)),
+											_1: lam(_p12._1._0._1)
 										}
 									},
-									_1: translate(_p14._1._1)
+									_1: translate(_p12._1._1)
 								};
 							} else {
-								break _v6_3;
+								break _v5_3;
 							}
 						case 'FunctionDeclaration':
 							return {
 								ctor: '::',
 								_0: {
 									ctor: '_Tuple2',
-									_0: _p14._0._0,
+									_0: _p12._0._0,
 									_1: {
 										ctor: '_Tuple2',
 										_0: _elm_lang$core$Maybe$Nothing,
-										_1: _user$project$Translate$to_str(_p14._0._2)
+										_1: _user$project$Translate$to_str(_p12._0._2)
 									}
 								},
-								_1: translate(_p14._1)
+								_1: translate(_p12._1)
 							};
 						case 'Comment':
 							return {ctor: '[]'};
 						default:
-							break _v6_3;
+							break _v5_3;
 					}
 				} else {
 					return {ctor: '[]'};
 				}
 			} while(false);
-			var _v8 = _p14._1;
-			ss = _v8;
+			var _v7 = _p12._1;
+			ss = _v7;
 			continue translate;
 		}
 	};
@@ -17913,9 +18055,9 @@ var _user$project$Translate$translate_module = function (ss) {
 	};
 };
 var _user$project$Translate$translate = function (res) {
-	var _p16 = res;
-	if (_p16.ctor === 'Ok') {
-		return _user$project$Translate$translate_module(_p16._0._2);
+	var _p14 = res;
+	if (_p14.ctor === 'Ok') {
+		return _user$project$Translate$translate_module(_p14._0._2);
 	} else {
 		return {
 			name: 'Error',
@@ -17929,7 +18071,7 @@ var _user$project$Translate$translate = function (res) {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Maybe$Nothing,
 					_1: _user$project$Translate$to_str(
-						{ctor: '_Tuple3', _0: _p16._0._0, _1: _p16._0._1, _2: _p16._0._2})
+						{ctor: '_Tuple3', _0: _p14._0._0, _1: _p14._0._1, _2: _p14._0._2})
 				})
 		};
 	}
@@ -17949,6 +18091,27 @@ var _user$project$Main$descend_left = F2(
 				case 'Lam':
 					return _elm_lang$core$List$reverse(
 						{ctor: '::', _0: _user$project$Lang$FLamArg, _1: acc});
+				case 'Tup':
+					var _p1 = _p0._0;
+					if (_p1.ctor === '::') {
+						var _v4 = _p1._0,
+							_v5 = {
+							ctor: '::',
+							_0: _user$project$Lang$FTup(0),
+							_1: acc
+						};
+						exp_ = _v4;
+						acc = _v5;
+						continue descend_left;
+					} else {
+						return _elm_lang$core$List$reverse(acc);
+					}
+				case 'Case':
+					var _v6 = _p0._0,
+						_v7 = {ctor: '::', _0: _user$project$Lang$FCaseExp, _1: acc};
+					exp_ = _v6;
+					acc = _v7;
+					continue descend_left;
 				default:
 					return _elm_lang$core$List$reverse(acc);
 			}
@@ -17958,25 +18121,47 @@ var _user$project$Main$descend_right = F2(
 	function (exp_, acc) {
 		descend_right:
 		while (true) {
-			var _p1 = exp_;
-			switch (_p1.ctor) {
+			var _p2 = exp_;
+			switch (_p2.ctor) {
 				case 'Apply':
-					var _v4 = _p1._1,
-						_v5 = {ctor: '::', _0: _user$project$Lang$FApplyArg, _1: acc};
-					exp_ = _v4;
-					acc = _v5;
+					var _v9 = _p2._1,
+						_v10 = {ctor: '::', _0: _user$project$Lang$FApplyArg, _1: acc};
+					exp_ = _v9;
+					acc = _v10;
 					continue descend_right;
 				case 'Let':
-					var _v6 = _p1._1,
-						_v7 = {ctor: '::', _0: _user$project$Lang$FLetExp, _1: acc};
-					exp_ = _v6;
-					acc = _v7;
+					var _v11 = _p2._1,
+						_v12 = {ctor: '::', _0: _user$project$Lang$FLetExp, _1: acc};
+					exp_ = _v11;
+					acc = _v12;
 					continue descend_right;
 				case 'Lam':
-					var _v8 = _p1._1,
-						_v9 = {ctor: '::', _0: _user$project$Lang$FLamExp, _1: acc};
-					exp_ = _v8;
-					acc = _v9;
+					var _v13 = _p2._1,
+						_v14 = {ctor: '::', _0: _user$project$Lang$FLamExp, _1: acc};
+					exp_ = _v13;
+					acc = _v14;
+					continue descend_right;
+				case 'Tup':
+					var _p4 = _p2._0;
+					var _p3 = _elm_lang$core$List$reverse(_p4);
+					if (_p3.ctor === '::') {
+						return A2(
+							_user$project$Main$descend_left,
+							_p3._0,
+							{
+								ctor: '::',
+								_0: _user$project$Lang$FTup(
+									_elm_lang$core$List$length(_p4) - 1),
+								_1: acc
+							});
+					} else {
+						return _elm_lang$core$List$reverse(acc);
+					}
+				case 'Case':
+					var _v16 = _p2._0,
+						_v17 = {ctor: '::', _0: _user$project$Lang$FCaseExp, _1: acc};
+					exp_ = _v16;
+					acc = _v17;
 					continue descend_right;
 				default:
 					return _elm_lang$core$List$reverse(acc);
@@ -17985,100 +18170,155 @@ var _user$project$Main$descend_right = F2(
 	});
 var _user$project$Main$walk_bindings = F2(
 	function (bindings, at) {
-		var _p2 = at;
-		if ((_p2.ctor === '::') && (_p2._0.ctor === 'FBindingValue')) {
-			return A2(
-				_elm_lang$core$Maybe$andThen,
-				function (_p3) {
-					return function (exp) {
-						return A2(_user$project$Main$walk_exp, exp, _p2._1);
-					}(
-						_elm_lang$core$Tuple$second(
-							_elm_lang$core$Tuple$second(_p3)));
-				},
-				A2(_Gizra$elm_dictlist$DictList$getAt, _p2._0._0, bindings));
-		} else {
-			return _elm_lang$core$Maybe$Nothing;
-		}
+		var _p5 = at;
+		_v18_2:
+		do {
+			if (_p5.ctor === '::') {
+				switch (_p5._0.ctor) {
+					case 'FBindingValue':
+						return A2(
+							_elm_lang$core$Maybe$andThen,
+							function (_p6) {
+								return function (exp) {
+									return A2(_user$project$Main$walk_exp, exp, _p5._1);
+								}(
+									_elm_lang$core$Tuple$second(
+										_elm_lang$core$Tuple$second(_p6)));
+							},
+							A2(_Gizra$elm_dictlist$DictList$getAt, _p5._0._0, bindings));
+					case 'FPoint':
+						if (_p5._1.ctor === '[]') {
+							return _elm_lang$core$Maybe$Just(
+								_user$project$Lang$Record(bindings));
+						} else {
+							break _v18_2;
+						}
+					default:
+						break _v18_2;
+				}
+			} else {
+				break _v18_2;
+			}
+		} while(false);
+		return _elm_lang$core$Maybe$Nothing;
 	});
 var _user$project$Main$walk_exp = F2(
 	function (exp_, at_) {
 		walk_exp:
 		while (true) {
-			var _p4 = {ctor: '_Tuple2', _0: exp_, _1: at_};
-			_v11_8:
+			var _p7 = {ctor: '_Tuple2', _0: exp_, _1: at_};
+			_v19_11:
 			do {
-				if ((_p4.ctor === '_Tuple2') && (_p4._1.ctor === '::')) {
-					switch (_p4._1._0.ctor) {
+				if ((_p7.ctor === '_Tuple2') && (_p7._1.ctor === '::')) {
+					switch (_p7._1._0.ctor) {
 						case 'FApplyFun':
-							if (_p4._0.ctor === 'Apply') {
-								var _v12 = _p4._0._0,
-									_v13 = _p4._1._1;
-								exp_ = _v12;
-								at_ = _v13;
-								continue walk_exp;
-							} else {
-								break _v11_8;
-							}
-						case 'FApplyArg':
-							if (_p4._0.ctor === 'Apply') {
-								var _v14 = _p4._0._1,
-									_v15 = _p4._1._1;
-								exp_ = _v14;
-								at_ = _v15;
-								continue walk_exp;
-							} else {
-								break _v11_8;
-							}
-						case 'FLetBindings':
-							if (_p4._0.ctor === 'Let') {
-								return A2(_user$project$Main$walk_bindings, _p4._0._0, _p4._1._1);
-							} else {
-								break _v11_8;
-							}
-						case 'FLetExp':
-							if (_p4._0.ctor === 'Let') {
-								var _v16 = _p4._0._1,
-									_v17 = _p4._1._1;
-								exp_ = _v16;
-								at_ = _v17;
-								continue walk_exp;
-							} else {
-								break _v11_8;
-							}
-						case 'FLamArg':
-							if (_p4._0.ctor === 'Lam') {
-								return _elm_lang$core$Maybe$Nothing;
-							} else {
-								break _v11_8;
-							}
-						case 'FLamExp':
-							if (_p4._0.ctor === 'Lam') {
-								var _v18 = _p4._0._1,
-									_v19 = _p4._1._1;
-								exp_ = _v18;
-								at_ = _v19;
-								continue walk_exp;
-							} else {
-								break _v11_8;
-							}
-						case 'FCaseExp':
-							if (_p4._0.ctor === 'Case') {
-								var _v20 = _p4._0._0,
-									_v21 = _p4._1._1;
+							if (_p7._0.ctor === 'Apply') {
+								var _v20 = _p7._0._0,
+									_v21 = _p7._1._1;
 								exp_ = _v20;
 								at_ = _v21;
 								continue walk_exp;
 							} else {
-								break _v11_8;
+								break _v19_11;
+							}
+						case 'FApplyArg':
+							if (_p7._0.ctor === 'Apply') {
+								var _v22 = _p7._0._1,
+									_v23 = _p7._1._1;
+								exp_ = _v22;
+								at_ = _v23;
+								continue walk_exp;
+							} else {
+								break _v19_11;
+							}
+						case 'FLetBindings':
+							if (_p7._0.ctor === 'Let') {
+								return A2(_user$project$Main$walk_bindings, _p7._0._0, _p7._1._1);
+							} else {
+								break _v19_11;
+							}
+						case 'FLetExp':
+							if (_p7._0.ctor === 'Let') {
+								var _v24 = _p7._0._1,
+									_v25 = _p7._1._1;
+								exp_ = _v24;
+								at_ = _v25;
+								continue walk_exp;
+							} else {
+								break _v19_11;
+							}
+						case 'FLamArg':
+							if (_p7._0.ctor === 'Lam') {
+								return _elm_lang$core$Maybe$Nothing;
+							} else {
+								break _v19_11;
+							}
+						case 'FLamExp':
+							if (_p7._0.ctor === 'Lam') {
+								var _v26 = _p7._0._1,
+									_v27 = _p7._1._1;
+								exp_ = _v26;
+								at_ = _v27;
+								continue walk_exp;
+							} else {
+								break _v19_11;
+							}
+						case 'FCaseExp':
+							if (_p7._0.ctor === 'Case') {
+								var _v28 = _p7._0._0,
+									_v29 = _p7._1._1;
+								exp_ = _v28;
+								at_ = _v29;
+								continue walk_exp;
+							} else {
+								break _v19_11;
+							}
+						case 'FCasePattern':
+							if (_p7._0.ctor === 'Case') {
+								return A2(
+									_elm_lang$core$Maybe$andThen,
+									function (exp) {
+										return A2(_user$project$Main$walk_exp, exp, _p7._1._1);
+									},
+									A2(
+										_elm_lang$core$Maybe$map,
+										_elm_lang$core$Tuple$first,
+										A2(_elm_community$list_extra$List_Extra_ops['!!'], _p7._0._1, _p7._1._0._0)));
+							} else {
+								break _v19_11;
+							}
+						case 'FCaseResult':
+							if (_p7._0.ctor === 'Case') {
+								return A2(
+									_elm_lang$core$Maybe$andThen,
+									function (exp) {
+										return A2(_user$project$Main$walk_exp, exp, _p7._1._1);
+									},
+									A2(
+										_elm_lang$core$Maybe$map,
+										_elm_lang$core$Tuple$second,
+										A2(_elm_community$list_extra$List_Extra_ops['!!'], _p7._0._1, _p7._1._0._0)));
+							} else {
+								break _v19_11;
+							}
+						case 'FTup':
+							if (_p7._0.ctor === 'Tup') {
+								return A2(
+									_elm_lang$core$Maybe$andThen,
+									function (exp) {
+										return A2(_user$project$Main$walk_exp, exp, _p7._1._1);
+									},
+									A2(_elm_community$list_extra$List_Extra_ops['!!'], _p7._0._0, _p7._1._0._0));
+							} else {
+								break _v19_11;
 							}
 						case 'FPoint':
-							return _elm_lang$core$Maybe$Just(_p4._0);
+							return _elm_lang$core$Maybe$Just(_p7._0);
 						default:
-							break _v11_8;
+							break _v19_11;
 					}
 				} else {
-					break _v11_8;
+					break _v19_11;
 				}
 			} while(false);
 			return _elm_lang$core$Maybe$Nothing;
@@ -18088,15 +18328,15 @@ var _user$project$Main$remove_point = F2(
 	function (xs, acc) {
 		remove_point:
 		while (true) {
-			var _p5 = xs;
-			if (_p5.ctor === '::') {
-				if (_p5._0.ctor === 'FPoint') {
+			var _p8 = xs;
+			if (_p8.ctor === '::') {
+				if (_p8._0.ctor === 'FPoint') {
 					return _elm_lang$core$List$reverse(acc);
 				} else {
-					var _v23 = _p5._1,
-						_v24 = {ctor: '::', _0: _p5._0, _1: acc};
-					xs = _v23;
-					acc = _v24;
+					var _v31 = _p8._1,
+						_v32 = {ctor: '::', _0: _p8._0, _1: acc};
+					xs = _v31;
+					acc = _v32;
 					continue remove_point;
 				}
 			} else {
@@ -18108,16 +18348,16 @@ var _user$project$Main$remove_last = F2(
 	function (xs, acc) {
 		remove_last:
 		while (true) {
-			var _p6 = xs;
-			if (_p6.ctor === '::') {
-				if ((_p6._1.ctor === '::') && (_p6._1._0.ctor === 'FPoint')) {
+			var _p9 = xs;
+			if (_p9.ctor === '::') {
+				if ((_p9._1.ctor === '::') && (_p9._1._0.ctor === 'FPoint')) {
 					return _elm_lang$core$List$reverse(
 						{ctor: '::', _0: _user$project$Lang$FPoint, _1: acc});
 				} else {
-					var _v26 = _p6._1,
-						_v27 = {ctor: '::', _0: _p6._0, _1: acc};
-					xs = _v26;
-					acc = _v27;
+					var _v34 = _p9._1,
+						_v35 = {ctor: '::', _0: _p9._0, _1: acc};
+					xs = _v34;
+					acc = _v35;
 					continue remove_last;
 				}
 			} else {
@@ -18130,11 +18370,11 @@ var _user$project$Main$update_last = F3(
 	function (focus, at, acc) {
 		update_last:
 		while (true) {
-			var _p7 = at;
-			if (_p7.ctor === '::') {
-				if ((_p7._1.ctor === '::') && (_p7._1._0.ctor === 'FPoint')) {
-					var _p8 = focus;
-					if (_p8.ctor === 'FPoint') {
+			var _p10 = at;
+			if (_p10.ctor === '::') {
+				if ((_p10._1.ctor === '::') && (_p10._1._0.ctor === 'FPoint')) {
+					var _p11 = focus;
+					if (_p11.ctor === 'FPoint') {
 						return A2(
 							_elm_lang$core$Basics_ops['++'],
 							acc,
@@ -18158,7 +18398,7 @@ var _user$project$Main$update_last = F3(
 							});
 					}
 				} else {
-					if (_p7._0.ctor === 'FPoint') {
+					if (_p10._0.ctor === 'FPoint') {
 						return A2(
 							_elm_lang$core$Basics_ops['++'],
 							acc,
@@ -18168,19 +18408,19 @@ var _user$project$Main$update_last = F3(
 								_1: {ctor: '[]'}
 							});
 					} else {
-						var _v30 = focus,
-							_v31 = _p7._1,
-							_v32 = A2(
+						var _v38 = focus,
+							_v39 = _p10._1,
+							_v40 = A2(
 							_elm_lang$core$Basics_ops['++'],
 							acc,
 							{
 								ctor: '::',
-								_0: _p7._0,
+								_0: _p10._0,
 								_1: {ctor: '[]'}
 							});
-						focus = _v30;
-						at = _v31;
-						acc = _v32;
+						focus = _v38;
+						at = _v39;
+						acc = _v40;
 						continue update_last;
 					}
 				}
@@ -18199,13 +18439,13 @@ var _user$project$Main$update_last = F3(
 var _user$project$Main$get_last = function (at) {
 	get_last:
 	while (true) {
-		var _p9 = at;
-		if (_p9.ctor === '::') {
-			if (((_p9._1.ctor === '::') && (_p9._1._0.ctor === 'FPoint')) && (_p9._1._1.ctor === '[]')) {
-				return _elm_lang$core$Maybe$Just(_p9._0);
+		var _p12 = at;
+		if (_p12.ctor === '::') {
+			if (((_p12._1.ctor === '::') && (_p12._1._0.ctor === 'FPoint')) && (_p12._1._1.ctor === '[]')) {
+				return _elm_lang$core$Maybe$Just(_p12._0);
 			} else {
-				var _v34 = _p9._1;
-				at = _v34;
+				var _v42 = _p12._1;
+				at = _v42;
 				continue get_last;
 			}
 		} else {
@@ -18213,322 +18453,656 @@ var _user$project$Main$get_last = function (at) {
 		}
 	}
 };
-var _user$project$Main$ascend_left = function (at) {
-	ascend_left:
-	while (true) {
-		var _p10 = _user$project$Main$get_last(at);
-		if (_p10.ctor === 'Just') {
-			var _p11 = _p10._0;
-			switch (_p11.ctor) {
-				case 'FLetExp':
-					return A3(
-						_user$project$Main$update_last,
-						_user$project$Lang$FLetBindings,
-						at,
-						{ctor: '[]'});
-				case 'FLamArg':
-					var _v37 = A2(
-						_user$project$Main$remove_last,
-						at,
-						{ctor: '[]'});
-					at = _v37;
-					continue ascend_left;
-				case 'FLamExp':
-					return A3(
-						_user$project$Main$update_last,
-						_user$project$Lang$FLamArg,
-						at,
-						{ctor: '[]'});
-				case 'FApplyFun':
-					var _v38 = A2(
-						_user$project$Main$remove_last,
-						at,
-						{ctor: '[]'});
-					at = _v38;
-					continue ascend_left;
-				case 'FApplyArg':
-					return A3(
-						_user$project$Main$update_last,
-						_user$project$Lang$FApplyFun,
-						at,
-						{ctor: '[]'});
-				case 'FCaseResult':
-					return A3(
-						_user$project$Main$update_last,
-						_user$project$Lang$FCasePattern(_p11._0),
-						at,
-						{ctor: '[]'});
-				case 'FRecordValue':
-					return A3(
-						_user$project$Main$update_last,
-						_user$project$Lang$FRecordKey(_p11._0),
-						at,
-						{ctor: '[]'});
-				default:
-					return at;
-			}
-		} else {
-			return at;
-		}
-	}
-};
-var _user$project$Main$ascend_right = function (at) {
-	ascend_right:
-	while (true) {
-		var _p12 = _user$project$Main$get_last(at);
-		if (_p12.ctor === 'Just') {
-			var _p13 = _p12._0;
-			switch (_p13.ctor) {
-				case 'FLetBindings':
-					return A3(
-						_user$project$Main$update_last,
-						_user$project$Lang$FLetExp,
-						at,
-						{ctor: '[]'});
-				case 'FLamArg':
-					return A3(
-						_user$project$Main$update_last,
-						_user$project$Lang$FLamExp,
-						at,
-						{ctor: '[]'});
-				case 'FLamExp':
-					var _v41 = A2(
-						_user$project$Main$remove_last,
-						at,
-						{ctor: '[]'});
-					at = _v41;
-					continue ascend_right;
-				case 'FApplyFun':
-					return A3(
-						_user$project$Main$update_last,
-						_user$project$Lang$FApplyArg,
-						at,
-						{ctor: '[]'});
-				case 'FApplyArg':
-					var _v42 = A2(
-						_user$project$Main$remove_last,
-						at,
-						{ctor: '[]'});
-					at = _v42;
-					continue ascend_right;
-				case 'FCasePattern':
-					return A3(
-						_user$project$Main$update_last,
-						_user$project$Lang$FCaseResult(_p13._0),
-						at,
-						{ctor: '[]'});
-				case 'FRecordKey':
-					return A3(
-						_user$project$Main$update_last,
-						_user$project$Lang$FRecordValue(_p13._0),
-						at,
-						{ctor: '[]'});
-				default:
-					return at;
-			}
-		} else {
-			return at;
-		}
-	}
-};
-var _user$project$Main$ascend_up = function (at) {
-	ascend_up:
-	while (true) {
-		var _p14 = _user$project$Main$get_last(at);
-		if (_p14.ctor === 'Just') {
-			var _p15 = _p14._0;
-			switch (_p15.ctor) {
-				case 'FCasePattern':
-					var _p16 = _p15._0;
-					return (_elm_lang$core$Native_Utils.cmp(_p16, 0) > 0) ? A3(
-						_user$project$Main$update_last,
-						_user$project$Lang$FCasePattern(_p16 - 1),
-						at,
-						{ctor: '[]'}) : A3(
-						_user$project$Main$update_last,
-						_user$project$Lang$FCaseExp,
-						at,
-						{ctor: '[]'});
-				case 'FCaseResult':
-					var _p17 = _p15._0;
-					if (_elm_lang$core$Native_Utils.cmp(_p17, 0) > 0) {
+var _user$project$Main$ascend_left = F2(
+	function (bs, at) {
+		ascend_left:
+		while (true) {
+			var _p13 = _user$project$Main$get_last(at);
+			if (_p13.ctor === 'Just') {
+				var _p14 = _p13._0;
+				switch (_p14.ctor) {
+					case 'FLetExp':
 						return A3(
 							_user$project$Main$update_last,
-							_user$project$Lang$FCaseResult(_p17 - 1),
+							_user$project$Lang$FLetBindings,
 							at,
 							{ctor: '[]'});
-					} else {
-						var _v45 = A2(
+					case 'FLamArg':
+						var _v45 = bs,
+							_v46 = A2(
 							_user$project$Main$remove_last,
 							at,
 							{ctor: '[]'});
-						at = _v45;
-						continue ascend_up;
-					}
-				default:
-					var _v46 = A2(
-						_user$project$Main$remove_last,
-						at,
-						{ctor: '[]'});
-					at = _v46;
-					continue ascend_up;
+						bs = _v45;
+						at = _v46;
+						continue ascend_left;
+					case 'FLamExp':
+						return A3(
+							_user$project$Main$update_last,
+							_user$project$Lang$FLamArg,
+							at,
+							{ctor: '[]'});
+					case 'FApplyFun':
+						var _v47 = bs,
+							_v48 = A2(
+							_user$project$Main$remove_last,
+							at,
+							{ctor: '[]'});
+						bs = _v47;
+						at = _v48;
+						continue ascend_left;
+					case 'FApplyArg':
+						return A3(
+							_user$project$Main$update_last,
+							_user$project$Lang$FApplyFun,
+							at,
+							{ctor: '[]'});
+					case 'FCaseExp':
+						var _v49 = bs,
+							_v50 = A2(
+							_user$project$Main$remove_last,
+							at,
+							{ctor: '[]'});
+						bs = _v49;
+						at = _v50;
+						continue ascend_left;
+					case 'FCasePattern':
+						var _v51 = bs,
+							_v52 = A2(
+							_user$project$Main$remove_last,
+							at,
+							{ctor: '[]'});
+						bs = _v51;
+						at = _v52;
+						continue ascend_left;
+					case 'FCaseResult':
+						return A3(
+							_user$project$Main$update_last,
+							_user$project$Lang$FCasePattern(_p14._0),
+							at,
+							{ctor: '[]'});
+					case 'FRecordValue':
+						return A3(
+							_user$project$Main$update_last,
+							_user$project$Lang$FRecordKey(_p14._0),
+							at,
+							{ctor: '[]'});
+					case 'FTup':
+						var _p15 = _p14._0;
+						if (_elm_lang$core$Native_Utils.cmp(_p15, 0) > 0) {
+							return A3(
+								_user$project$Main$update_last,
+								_user$project$Lang$FTup(_p15 - 1),
+								at,
+								{ctor: '[]'});
+						} else {
+							var _v53 = bs,
+								_v54 = A2(
+								_user$project$Main$remove_last,
+								at,
+								{ctor: '[]'});
+							bs = _v53;
+							at = _v54;
+							continue ascend_left;
+						}
+					case 'FBindingValue':
+						return A3(
+							_user$project$Main$update_last,
+							_user$project$Lang$FBindingName(_p14._0),
+							at,
+							{ctor: '[]'});
+					default:
+						var _v55 = bs,
+							_v56 = A2(
+							_user$project$Main$remove_last,
+							at,
+							{ctor: '[]'});
+						bs = _v55;
+						at = _v56;
+						continue ascend_left;
+				}
+			} else {
+				return at;
 			}
-		} else {
-			return at;
 		}
-	}
-};
-var _user$project$Main$ascend_down = function (at) {
-	var _p18 = _user$project$Main$get_last(at);
-	if (_p18.ctor === 'Just') {
-		var _p19 = _p18._0;
-		return at;
-	} else {
-		return at;
-	}
-};
+	});
+var _user$project$Main$ascend_right = F2(
+	function (bs, at) {
+		ascend_right:
+		while (true) {
+			var _p16 = _user$project$Main$get_last(at);
+			if (_p16.ctor === 'Just') {
+				var _p17 = _p16._0;
+				switch (_p17.ctor) {
+					case 'FLetBindings':
+						return A3(
+							_user$project$Main$update_last,
+							_user$project$Lang$FLetExp,
+							at,
+							{ctor: '[]'});
+					case 'FLamArg':
+						return A3(
+							_user$project$Main$update_last,
+							_user$project$Lang$FLamExp,
+							at,
+							{ctor: '[]'});
+					case 'FLamExp':
+						var _v59 = bs,
+							_v60 = A2(
+							_user$project$Main$remove_last,
+							at,
+							{ctor: '[]'});
+						bs = _v59;
+						at = _v60;
+						continue ascend_right;
+					case 'FApplyFun':
+						return A3(
+							_user$project$Main$update_last,
+							_user$project$Lang$FApplyArg,
+							at,
+							{ctor: '[]'});
+					case 'FApplyArg':
+						var _v61 = bs,
+							_v62 = A2(
+							_user$project$Main$remove_last,
+							at,
+							{ctor: '[]'});
+						bs = _v61;
+						at = _v62;
+						continue ascend_right;
+					case 'FCaseExp':
+						var _v63 = bs,
+							_v64 = A2(
+							_user$project$Main$remove_last,
+							at,
+							{ctor: '[]'});
+						bs = _v63;
+						at = _v64;
+						continue ascend_right;
+					case 'FCasePattern':
+						return A3(
+							_user$project$Main$update_last,
+							_user$project$Lang$FCaseResult(_p17._0),
+							at,
+							{ctor: '[]'});
+					case 'FRecordKey':
+						return A3(
+							_user$project$Main$update_last,
+							_user$project$Lang$FRecordValue(_p17._0),
+							at,
+							{ctor: '[]'});
+					case 'FTup':
+						var _p19 = _p17._0;
+						var _p18 = A2(
+							_user$project$Main$walk_bindings,
+							bs,
+							A2(
+								_user$project$Main$remove_last,
+								at,
+								{ctor: '[]'}));
+						if ((_p18.ctor === 'Just') && (_p18._0.ctor === 'Tup')) {
+							if (_elm_lang$core$Native_Utils.cmp(
+								_p19 + 1,
+								_elm_lang$core$List$length(_p18._0._0)) < 0) {
+								return A3(
+									_user$project$Main$update_last,
+									_user$project$Lang$FTup(_p19 + 1),
+									at,
+									{ctor: '[]'});
+							} else {
+								var _v66 = bs,
+									_v67 = A2(
+									_user$project$Main$remove_last,
+									at,
+									{ctor: '[]'});
+								bs = _v66;
+								at = _v67;
+								continue ascend_right;
+							}
+						} else {
+							var _v68 = bs,
+								_v69 = A2(
+								_user$project$Main$remove_last,
+								at,
+								{ctor: '[]'});
+							bs = _v68;
+							at = _v69;
+							continue ascend_right;
+						}
+					case 'FBindingName':
+						return A3(
+							_user$project$Main$update_last,
+							_user$project$Lang$FBindingValue(_p17._0),
+							at,
+							{ctor: '[]'});
+					default:
+						var _v70 = bs,
+							_v71 = A2(
+							_user$project$Main$remove_last,
+							at,
+							{ctor: '[]'});
+						bs = _v70;
+						at = _v71;
+						continue ascend_right;
+				}
+			} else {
+				return at;
+			}
+		}
+	});
+var _user$project$Main$ascend_up = F2(
+	function (bs, at) {
+		ascend_up:
+		while (true) {
+			var _p20 = _user$project$Main$get_last(at);
+			if (_p20.ctor === 'Just') {
+				var _p21 = _p20._0;
+				switch (_p21.ctor) {
+					case 'FCasePattern':
+						var _p22 = _p21._0;
+						return (_elm_lang$core$Native_Utils.cmp(_p22, 0) > 0) ? A3(
+							_user$project$Main$update_last,
+							_user$project$Lang$FCasePattern(_p22 - 1),
+							at,
+							{ctor: '[]'}) : A3(
+							_user$project$Main$update_last,
+							_user$project$Lang$FCaseExp,
+							at,
+							{ctor: '[]'});
+					case 'FCaseResult':
+						var _p23 = _p21._0;
+						if (_elm_lang$core$Native_Utils.cmp(_p23, 0) > 0) {
+							return A3(
+								_user$project$Main$update_last,
+								_user$project$Lang$FCaseResult(_p23 - 1),
+								at,
+								{ctor: '[]'});
+						} else {
+							var _v74 = bs,
+								_v75 = A2(
+								_user$project$Main$remove_last,
+								at,
+								{ctor: '[]'});
+							bs = _v74;
+							at = _v75;
+							continue ascend_up;
+						}
+					case 'FBindingName':
+						var _p24 = _p21._0;
+						if (_elm_lang$core$Native_Utils.cmp(_p24, 0) > 0) {
+							return A3(
+								_user$project$Main$update_last,
+								_user$project$Lang$FBindingName(_p24 - 1),
+								at,
+								{ctor: '[]'});
+						} else {
+							var _v76 = bs,
+								_v77 = A2(
+								_user$project$Main$remove_last,
+								at,
+								{ctor: '[]'});
+							bs = _v76;
+							at = _v77;
+							continue ascend_up;
+						}
+					case 'FBindingValue':
+						var _p25 = _p21._0;
+						if (_elm_lang$core$Native_Utils.cmp(_p25, 0) > 0) {
+							return A3(
+								_user$project$Main$update_last,
+								_user$project$Lang$FBindingValue(_p25 - 1),
+								at,
+								{ctor: '[]'});
+						} else {
+							var _v78 = bs,
+								_v79 = A2(
+								_user$project$Main$remove_last,
+								at,
+								{ctor: '[]'});
+							bs = _v78;
+							at = _v79;
+							continue ascend_up;
+						}
+					default:
+						var _v80 = bs,
+							_v81 = A2(
+							_user$project$Main$remove_last,
+							at,
+							{ctor: '[]'});
+						bs = _v80;
+						at = _v81;
+						continue ascend_up;
+				}
+			} else {
+				return at;
+			}
+		}
+	});
+var _user$project$Main$ascend_down = F2(
+	function (bs, at) {
+		ascend_down:
+		while (true) {
+			var _p26 = _user$project$Main$get_last(at);
+			if (_p26.ctor === 'Just') {
+				var _p27 = _p26._0;
+				switch (_p27.ctor) {
+					case 'FCaseExp':
+						return A3(
+							_user$project$Main$update_last,
+							_user$project$Lang$FCasePattern(0),
+							at,
+							{ctor: '[]'});
+					case 'FCasePattern':
+						var _p29 = _p27._0;
+						var _p28 = A2(
+							_user$project$Main$walk_bindings,
+							bs,
+							A2(
+								_user$project$Main$remove_last,
+								at,
+								{ctor: '[]'}));
+						if ((_p28.ctor === 'Just') && (_p28._0.ctor === 'Case')) {
+							if (_elm_lang$core$Native_Utils.cmp(
+								_p29 + 1,
+								_elm_lang$core$List$length(_p28._0._1)) < 0) {
+								return A3(
+									_user$project$Main$update_last,
+									_user$project$Lang$FCasePattern(_p29 + 1),
+									at,
+									{ctor: '[]'});
+							} else {
+								var _v85 = bs,
+									_v86 = A2(
+									_user$project$Main$remove_last,
+									at,
+									{ctor: '[]'});
+								bs = _v85;
+								at = _v86;
+								continue ascend_down;
+							}
+						} else {
+							var _v87 = bs,
+								_v88 = A2(
+								_user$project$Main$remove_last,
+								at,
+								{ctor: '[]'});
+							bs = _v87;
+							at = _v88;
+							continue ascend_down;
+						}
+					case 'FCaseResult':
+						var _p31 = _p27._0;
+						var _p30 = A2(
+							_user$project$Main$walk_bindings,
+							bs,
+							A2(
+								_user$project$Main$remove_last,
+								at,
+								{ctor: '[]'}));
+						if ((_p30.ctor === 'Just') && (_p30._0.ctor === 'Case')) {
+							if (_elm_lang$core$Native_Utils.cmp(
+								_p31 + 1,
+								_elm_lang$core$List$length(_p30._0._1)) < 0) {
+								return A3(
+									_user$project$Main$update_last,
+									_user$project$Lang$FCaseResult(_p31 + 1),
+									at,
+									{ctor: '[]'});
+							} else {
+								var _v90 = bs,
+									_v91 = A2(
+									_user$project$Main$remove_last,
+									at,
+									{ctor: '[]'});
+								bs = _v90;
+								at = _v91;
+								continue ascend_down;
+							}
+						} else {
+							var _v92 = bs,
+								_v93 = A2(
+								_user$project$Main$remove_last,
+								at,
+								{ctor: '[]'});
+							bs = _v92;
+							at = _v93;
+							continue ascend_down;
+						}
+					case 'FBindingName':
+						var _p33 = _p27._0;
+						var _p32 = A2(
+							_user$project$Main$walk_bindings,
+							bs,
+							A2(
+								_user$project$Main$remove_last,
+								at,
+								{ctor: '[]'}));
+						if ((_p32.ctor === 'Just') && (_p32._0.ctor === 'Record')) {
+							return (_elm_lang$core$Native_Utils.cmp(
+								_p33 + 1,
+								_Gizra$elm_dictlist$DictList$length(_p32._0._0)) < 0) ? A3(
+								_user$project$Main$update_last,
+								_user$project$Lang$FBindingName(_p33 + 1),
+								at,
+								{ctor: '[]'}) : A2(
+								_user$project$Main$ascend_up,
+								bs,
+								A2(
+									_user$project$Main$remove_last,
+									at,
+									{ctor: '[]'}));
+						} else {
+							var _v95 = bs,
+								_v96 = A2(
+								_user$project$Main$remove_last,
+								at,
+								{ctor: '[]'});
+							bs = _v95;
+							at = _v96;
+							continue ascend_down;
+						}
+					case 'FBindingValue':
+						var _p35 = _p27._0;
+						var _p34 = A2(
+							_user$project$Main$walk_bindings,
+							bs,
+							A2(
+								_user$project$Main$remove_last,
+								at,
+								{ctor: '[]'}));
+						if ((_p34.ctor === 'Just') && (_p34._0.ctor === 'Record')) {
+							return (_elm_lang$core$Native_Utils.cmp(
+								_p35 + 1,
+								_Gizra$elm_dictlist$DictList$length(_p34._0._0)) < 0) ? A3(
+								_user$project$Main$update_last,
+								_user$project$Lang$FBindingValue(_p35 + 1),
+								at,
+								{ctor: '[]'}) : A2(
+								_user$project$Main$ascend_up,
+								bs,
+								A2(
+									_user$project$Main$remove_last,
+									at,
+									{ctor: '[]'}));
+						} else {
+							var _v98 = bs,
+								_v99 = A2(
+								_user$project$Main$remove_last,
+								at,
+								{ctor: '[]'});
+							bs = _v98;
+							at = _v99;
+							continue ascend_down;
+						}
+					default:
+						var _v100 = bs,
+							_v101 = A2(
+							_user$project$Main$remove_last,
+							at,
+							{ctor: '[]'});
+						bs = _v100;
+						at = _v101;
+						continue ascend_down;
+				}
+			} else {
+				return at;
+			}
+		}
+	});
 var _user$project$Main$key_press = F2(
 	function (key, model) {
-		var descend = function () {
-			var _p20 = key;
-			switch (_p20.ctor) {
-				case 'ArrowLeft':
-					return _user$project$Main$descend_right;
-				case 'ArrowRight':
-					return _user$project$Main$descend_left;
-				default:
-					return F2(
-						function (_p22, _p21) {
-							return {ctor: '[]'};
-						});
-			}
-		}();
-		var moved_caret = A2(
+		var _p36 = A2(
 			_elm_lang$core$Debug$log,
-			'moved_caret',
+			'ascended_cursor',
 			function () {
-				var _p23 = key;
-				switch (_p23.ctor) {
+				var _p37 = key;
+				switch (_p37.ctor) {
 					case 'ArrowLeft':
-						return _user$project$Main$ascend_left(model.caret);
+						return {ctor: '_Tuple3', _0: _user$project$Main$ascend_left, _1: _user$project$Main$descend_right, _2: false};
 					case 'ArrowRight':
-						return _user$project$Main$ascend_right(model.caret);
+						return {ctor: '_Tuple3', _0: _user$project$Main$ascend_right, _1: _user$project$Main$descend_left, _2: false};
 					case 'ArrowUp':
-						return _user$project$Main$ascend_up(model.caret);
+						return {ctor: '_Tuple3', _0: _user$project$Main$ascend_up, _1: _user$project$Main$descend_left, _2: true};
 					case 'ArrowDown':
-						return _user$project$Main$ascend_down(model.caret);
+						return {ctor: '_Tuple3', _0: _user$project$Main$ascend_down, _1: _user$project$Main$descend_left, _2: true};
 					default:
-						return model.caret;
+						return {
+							ctor: '_Tuple3',
+							_0: _elm_lang$core$Basics$always(_elm_lang$core$Basics$identity),
+							_1: _elm_lang$core$Basics$always(_elm_lang$core$Basics$identity),
+							_2: false
+						};
 				}
 			}());
+		var ascend = _p36._0;
+		var descend = _p36._1;
+		var updown = _p36._2;
+		var ascended_cursor = A2(ascend, model.ast.bindings, model.cursor);
+		var tail = A2(
+			_elm_lang$core$List$drop,
+			_elm_lang$core$List$length(ascended_cursor) - 1,
+			model.cursor);
 		var m_exp = A2(
 			_elm_lang$core$Debug$log,
 			'm_exp',
-			A2(_user$project$Main$walk_bindings, model.ast.bindings, moved_caret));
-		var caret = A2(
+			A2(_user$project$Main$walk_bindings, model.ast.bindings, ascended_cursor));
+		var cursor = A2(
 			_elm_lang$core$Debug$log,
-			'caret',
+			'cursor',
 			function () {
-				var _p24 = m_exp;
-				if (_p24.ctor === 'Just') {
-					return A2(
-						_elm_lang$core$Basics_ops['++'],
-						A2(
-							_user$project$Main$remove_point,
-							moved_caret,
-							{ctor: '[]'}),
-						A2(
+				var _p38 = m_exp;
+				if (_p38.ctor === 'Just') {
+					var _p39 = A2(
+						_elm_lang$core$Debug$log,
+						'exps',
+						{
+							ctor: '_Tuple3',
+							_0: updown,
+							_1: _elm_lang$core$Native_Utils.cmp(
+								_elm_lang$core$List$length(tail),
+								1) > 0,
+							_2: A2(
+								_user$project$Main$walk_bindings,
+								model.ast.bindings,
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									A2(
+										_user$project$Main$remove_point,
+										ascended_cursor,
+										{ctor: '[]'}),
+									tail))
+						});
+					if ((((_p39.ctor === '_Tuple3') && (_p39._0 === true)) && (_p39._1 === true)) && (_p39._2.ctor === 'Just')) {
+						return A2(
 							_elm_lang$core$Basics_ops['++'],
 							A2(
-								descend,
-								_p24._0,
+								_user$project$Main$remove_point,
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									A2(
+										_user$project$Main$remove_point,
+										ascended_cursor,
+										{ctor: '[]'}),
+									tail),
 								{ctor: '[]'}),
-							{
-								ctor: '::',
-								_0: _user$project$Lang$FPoint,
-								_1: {ctor: '[]'}
-							}));
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								A2(
+									descend,
+									_p39._2._0,
+									{ctor: '[]'}),
+								{
+									ctor: '::',
+									_0: _user$project$Lang$FPoint,
+									_1: {ctor: '[]'}
+								}));
+					} else {
+						return A2(
+							_elm_lang$core$Basics_ops['++'],
+							A2(
+								_user$project$Main$remove_point,
+								ascended_cursor,
+								{ctor: '[]'}),
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								A2(
+									descend,
+									_p38._0,
+									{ctor: '[]'}),
+								{
+									ctor: '::',
+									_0: _user$project$Lang$FPoint,
+									_1: {ctor: '[]'}
+								}));
+					}
 				} else {
-					return moved_caret;
+					return ascended_cursor;
 				}
 			}());
 		return _elm_lang$core$Native_Utils.update(
 			model,
-			{caret: caret});
+			{
+				cursor: _elm_lang$core$Native_Utils.eq(
+					cursor,
+					{
+						ctor: '::',
+						_0: _user$project$Lang$FPoint,
+						_1: {ctor: '[]'}
+					}) ? model.cursor : cursor
+			});
 	});
 var _user$project$Main$update_opts = F2(
 	function (msg, opts) {
-		var _p25 = msg;
-		switch (_p25.ctor) {
+		var _p40 = msg;
+		switch (_p40.ctor) {
 			case 'Source':
 				return _elm_lang$core$Native_Utils.update(
 					opts,
-					{source: _p25._0});
+					{source: _p40._0});
 			case 'Borders':
 				return _elm_lang$core$Native_Utils.update(
 					opts,
-					{borders: _p25._0});
+					{borders: _p40._0});
 			case 'Parens':
 				return _elm_lang$core$Native_Utils.update(
 					opts,
-					{parens: _p25._0});
+					{parens: _p40._0});
 			case 'Qualifiers':
 				return _elm_lang$core$Native_Utils.update(
 					opts,
-					{qualifiers: _p25._0});
+					{qualifiers: _p40._0});
 			case 'Infix':
 				return _elm_lang$core$Native_Utils.update(
 					opts,
-					{infix: _p25._0});
+					{infix: _p40._0});
 			case 'Snake':
 				return _elm_lang$core$Native_Utils.update(
 					opts,
-					{snake: _p25._0});
+					{snake: _p40._0});
 			default:
 				return _elm_lang$core$Native_Utils.update(
 					opts,
-					{direction: _p25._0});
-		}
-	});
-var _user$project$Main$update = F2(
-	function (msg, model) {
-		var _p26 = msg;
-		switch (_p26.ctor) {
-			case 'Nop':
-				return model;
-			case 'ChangeSrc':
-				var _p27 = _p26._0;
-				return _elm_lang$core$Native_Utils.update(
-					model,
-					{
-						src: _p27,
-						ast: _user$project$Translate$translate(
-							_Bogdanp$elm_ast$Ast$parse(_p27))
-					});
-			case 'OptionsMsg':
-				return _elm_lang$core$Native_Utils.update(
-					model,
-					{
-						opts: A2(_user$project$Main$update_opts, _p26._0, model.opts)
-					});
-			case 'ChangeCursor':
-				return _elm_lang$core$Native_Utils.update(
-					model,
-					{cursor: _p26._0});
-			case 'ChangeCaret':
-				return _elm_lang$core$Native_Utils.update(
-					model,
-					{caret: _p26._0});
-			default:
-				var _p28 = _p26._0;
-				return A2(
-					_user$project$Main$key_press,
-					_p28,
-					_elm_lang$core$Native_Utils.update(
-						model,
-						{
-							keys_pressed: {ctor: '::', _0: _p28, _1: model.keys_pressed}
-						}));
+					{direction: _p40._0});
 		}
 	});
 var _user$project$Main$a = '\nfizzbuzz : Int -> String\nfizzbuzz n =\n    case ( n % 3 == 0, n % 5 == 0) of\n      ( True, True ) -> \"fizzbuzz\"\n      ( True, False ) -> \"fizz\"\n      ( False, True ) -> \"buzz\"\n      ( False, False ) -> Basics.toString n\n';
@@ -18542,22 +19116,192 @@ var _user$project$Main$init = _elm_lang$core$Native_Utils.update(
 		ast: _user$project$Translate$translate(
 			_Bogdanp$elm_ast$Ast$parse(_user$project$Main$fbstr))
 	});
-var _user$project$Main$main = _elm_lang$html$Html$program(
-	{
-		init: {ctor: '_Tuple2', _0: _user$project$Main$init, _1: _elm_lang$core$Platform_Cmd$none},
-		update: F2(
-			function (msg, model) {
+var _user$project$Main$code = _elm_lang$core$Native_Platform.outgoingPort(
+	'code',
+	function (v) {
+		return v;
+	});
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p41 = msg;
+		switch (_p41.ctor) {
+			case 'Nop':
+				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+			case 'ChangeSrc':
+				var _p42 = _p41._0;
+				var ast = _user$project$Translate$translate(
+					_Bogdanp$elm_ast$Ast$parse(_p42));
 				return {
 					ctor: '_Tuple2',
-					_0: A2(_user$project$Main$update, msg, model),
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{src: _p42, ast: ast}),
+					_1: _user$project$Main$code(
+						A2(_user$project$Lang$str_bindings, 0, ast.bindings))
+				};
+			case 'OptionsMsg':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							opts: A2(_user$project$Main$update_opts, _p41._0, model.opts)
+						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			}),
+			case 'ChangePointer':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{pointer: _p41._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'ChangeCursor':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{cursor: _p41._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				var _p43 = _p41._0;
+				return {
+					ctor: '_Tuple2',
+					_0: A2(
+						_user$project$Main$key_press,
+						_p43,
+						_elm_lang$core$Native_Utils.update(
+							model,
+							{
+								keys_pressed: {ctor: '::', _0: _p43, _1: model.keys_pressed}
+							})),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+		}
+	});
+var _user$project$Main$main = _elm_lang$html$Html$programWithFlags(
+	{
+		init: function (_p44) {
+			var _p45 = _p44;
+			return {ctor: '_Tuple2', _0: _user$project$Main$init, _1: _elm_lang$core$Platform_Cmd$none};
+		},
+		update: _user$project$Main$update,
 		view: _user$project$View$view,
-		subscriptions: function (_p29) {
+		subscriptions: function (_p46) {
 			return _ohanhi$keyboard_extra$Keyboard_Extra$downs(_user$project$Model$KeyPress);
 		}
-	})();
+	})(
+	A2(
+		_elm_lang$core$Json_Decode$andThen,
+		function (swapCount) {
+			return _elm_lang$core$Json_Decode$succeed(
+				{swapCount: swapCount});
+		},
+		A2(_elm_lang$core$Json_Decode$field, 'swapCount', _elm_lang$core$Json_Decode$int)));
+var _user$project$Main$Vertical = {ctor: 'Vertical'};
+var _user$project$Main$Horizontal = {ctor: 'Horizontal'};
+var _user$project$Main$to_layout = function (exp_) {
+	var _p47 = exp_;
+	switch (_p47.ctor) {
+		case 'Apply':
+			return _elm_lang$core$Maybe$Just(_user$project$Main$Horizontal);
+		case 'Let':
+			return _elm_lang$core$Maybe$Just(_user$project$Main$Vertical);
+		case 'Lam':
+			return _elm_lang$core$Maybe$Just(_user$project$Main$Horizontal);
+		case 'Var':
+			return _elm_lang$core$Maybe$Nothing;
+		case 'Lit':
+			return _elm_lang$core$Maybe$Nothing;
+		case 'Tup':
+			return _elm_lang$core$Maybe$Just(_user$project$Main$Horizontal);
+		case 'Case':
+			return _elm_lang$core$Maybe$Just(_user$project$Main$Vertical);
+		default:
+			return _elm_lang$core$Maybe$Just(_user$project$Main$Vertical);
+	}
+};
+var _user$project$Main$Leaf = function (a) {
+	return {ctor: 'Leaf', _0: a};
+};
+var _user$project$Main$Node = F3(
+	function (a, b, c) {
+		return {ctor: 'Node', _0: a, _1: b, _2: c};
+	});
+var _user$project$Main$to_layout_tree = function (exp_) {
+	var _p48 = exp_;
+	switch (_p48.ctor) {
+		case 'Apply':
+			return A3(
+				_user$project$Main$Node,
+				_user$project$Main$Horizontal,
+				exp_,
+				{
+					ctor: '::',
+					_0: _user$project$Main$to_layout_tree(_p48._0),
+					_1: {
+						ctor: '::',
+						_0: _user$project$Main$to_layout_tree(_p48._1),
+						_1: {ctor: '[]'}
+					}
+				});
+		case 'Let':
+			return A3(
+				_user$project$Main$Node,
+				_user$project$Main$Vertical,
+				exp_,
+				{
+					ctor: '::',
+					_0: _user$project$Main$to_layout_tree(_p48._1),
+					_1: {ctor: '[]'}
+				});
+		case 'Lam':
+			return A3(
+				_user$project$Main$Node,
+				_user$project$Main$Horizontal,
+				exp_,
+				{
+					ctor: '::',
+					_0: _user$project$Main$Leaf(
+						_user$project$Lang$Var(
+							{ctor: '_Tuple2', _0: _elm_lang$core$Maybe$Nothing, _1: _p48._0})),
+					_1: {
+						ctor: '::',
+						_0: _user$project$Main$to_layout_tree(_p48._1),
+						_1: {ctor: '[]'}
+					}
+				});
+		case 'Var':
+			return _user$project$Main$Leaf(exp_);
+		case 'Lit':
+			return _user$project$Main$Leaf(exp_);
+		case 'Tup':
+			return A3(
+				_user$project$Main$Node,
+				_user$project$Main$Horizontal,
+				exp_,
+				A2(
+					_elm_lang$core$List$map,
+					function (exp) {
+						return _user$project$Main$to_layout_tree(exp);
+					},
+					_p48._0));
+		case 'Case':
+			return A3(
+				_user$project$Main$Node,
+				_user$project$Main$Vertical,
+				exp_,
+				{ctor: '[]'});
+		default:
+			return A3(
+				_user$project$Main$Node,
+				_user$project$Main$Vertical,
+				exp_,
+				{ctor: '[]'});
+	}
+};
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
 if (typeof _user$project$Main$main !== 'undefined') {

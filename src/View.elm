@@ -1,6 +1,6 @@
 module View exposing (view)
 
-import Html exposing (Html, div, span, text, pre, button, table, thead, tbody, th, tr, td, input, label)
+import Html exposing (Html, div, span, text, pre, button, table, thead, tbody, th, tr, td, input, label, pre)
 import Html.Attributes exposing (class, style, rows, cols, type_, checked)
 import Html.Events exposing (onInput)
 import Html.Events exposing (onClick)
@@ -15,7 +15,9 @@ import DictList exposing (DictList)
 import SeColor exposing (..)
 import SeRender exposing (..)
 import Json.Decode
-import Json.Encode exposing (encode)
+
+
+--import Json.Encode exposing (encode)
 
 
 type alias Context =
@@ -137,8 +139,9 @@ view model =
             ]
         , div [] [ text (toString model.pointer) ]
         , div [] [ text (toString model.cursor) ]
-        , div [] [ text (toString model.ast) ]
-        , div [] [ text (encode 4 (encode_bindings model.ast.bindings)) ]
+          --, div [] [ text (toString model.ast) ]
+          --, div [] [ text (encode 4 (encode_bindings model.ast.bindings)) ]
+        , pre [] [ text (str_bindings 0 model.ast.bindings) ]
           --, div [] [ text (toString model.keys_pressed) ]
           --, div [ class "module" ] [ view_module model.module_ ]
         ]
@@ -178,7 +181,7 @@ view_bindings ctx bindings =
     let
         view_binding_with_typ typ n name exp =
             [ div []
-                [ span [ class "name", style (c base0E ++ pointer_style (zoom (FBindingName n) ctx)) ] [ text (snake ctx.opts name) ]
+                [ span [ style (c base0E ++ pointer_style (zoom (FBindingName n) ctx)) ] [ text (snake ctx.opts name) ]
                 , keyword ":"
                 , view_typ (zoom (FBindingTyp n) ctx) typ
                   --, keyword ""
@@ -192,7 +195,7 @@ view_bindings ctx bindings =
             ]
 
         view_binding_no_typ n name exp =
-            [ span [ class "name" ] [ text (snake ctx.opts name) ]
+            [ span [] [ text (snake ctx.opts name) ]
             , keyword "="
             , view_exp (zoom (FBindingValue n) ctx) exp
             ]
@@ -262,10 +265,10 @@ view_qname ctx ( qs, name ) =
             Just qualifier ->
                 span (pointer_msgs ctx ++ [ style (pointer_style ctx ++ c base03) ])
                     [ if ctx.opts.qualifiers && qualifier /= "Basics" then
-                        span [ class "qualifier" ] [ text (qualifier ++ ".") ]
+                        span [] [ text (qualifier ++ ".") ]
                       else
                         span [] []
-                    , span [ class "unqualifiedname", style (c color) ] [ text (snake ctx.opts name) ]
+                    , span [ style (c color) ] [ text (snake ctx.opts name) ]
                     ]
 
 
@@ -430,11 +433,6 @@ rparen =
     paren ")"
 
 
-is_infix : String -> Bool
-is_infix fn =
-    (String.uncons fn |> Maybe.map (Tuple.first >> (\c -> isUpper c || isLower c))) ? True
-
-
 view_apply : Context -> Exp -> Exp -> Html Msg
 view_apply ctx f x =
     let
@@ -462,10 +460,10 @@ view_apply ctx f x =
     in
         case ( ctx.opts.infix, f ) of
             ( True, Apply (Var ( qs, fn )) y ) ->
-                if is_infix fn then
+                if not (is_infix fn) then
                     render f x
                 else
-                    span [ class "exp apply op", style (with_border1 ctx.opts) ]
+                    span [ style (with_border1 ctx.opts) ]
                         [ lparen ctx.opts
                         , span
                             (if ctx.opts.parens then
@@ -550,7 +548,7 @@ view_patmat ctx exp cases =
             tr []
                 [ td [ style ((pointer_style (zoom (FCasePattern n) ctx)) ++ with_border1 ctx.opts ++ td_style ++ [ "position" => "relative", "border-right-width" => "1px" ]) ]
                     [ view_exp (zoom (FCasePattern n) { ctx | is_pattern = True }) pat
-                    , span [ class "arrow", style pat_arrow_style ] [ text " → " ]
+                    , span [ style pat_arrow_style ] [ text " → " ]
                     ]
                 , td [ style (with_border1 ctx.opts ++ td_style ++ [ "padding-left" => "6px", "border-top-width" => "1px" ]) ]
                     [ view_exp (zoom (FCaseResult n) ctx) exp ]
@@ -595,7 +593,7 @@ view_literal ctx lit =
 
 keyword : String -> Html a
 keyword str =
-    span [ class "keyword", style (c base0A) ] [ text (" " ++ str ++ " ") ]
+    span [ style (c base0A) ] [ text (" " ++ str ++ " ") ]
 
 
 to_css : List ( String, String ) -> String
